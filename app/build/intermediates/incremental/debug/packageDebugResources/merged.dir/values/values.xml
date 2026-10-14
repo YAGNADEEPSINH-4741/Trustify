@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background_dark">#121316</color>
+    <color name="on_surface_dark">#E2E3E8</color>
+    <color name="primary">#0B57D0</color>
+    <color name="primary_dark">#0842A0</color>
+    <color name="surface_dark">#1E1F24</color>
+    <string name="app_name">SafeCall AI</string>
+    <string name="call_screening_service_description">Screens incoming calls to detect legitimate callers incorrectly flagged as spam and alerts you with verified evidence.</string>
+    <string name="notification_channel_description">Notifications when SafeCall AI screens an incoming call or recovers a false spam number.</string>
+    <string name="notification_channel_name">Caller Identification Alerts</string>
+    <style name="Theme.SafeCallAI" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/background_dark</item>
+        <item name="android:navigationBarColor">@color/background_dark</item>
+    </style>
+</resources>

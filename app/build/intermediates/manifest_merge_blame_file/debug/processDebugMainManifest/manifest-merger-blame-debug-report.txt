@@ -1,0 +1,175 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.safecallai.app"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="35" />
+10
+11    <!-- Permissions for Call Screening and Network Operations -->
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->D:\spam\app\src\main\AndroidManifest.xml:6:5-67
+12-->D:\spam\app\src\main\AndroidManifest.xml:6:22-64
+13    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+13-->D:\spam\app\src\main\AndroidManifest.xml:7:5-79
+13-->D:\spam\app\src\main\AndroidManifest.xml:7:22-76
+14    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+14-->D:\spam\app\src\main\AndroidManifest.xml:8:5-77
+14-->D:\spam\app\src\main\AndroidManifest.xml:8:22-74
+15    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+15-->D:\spam\app\src\main\AndroidManifest.xml:9:5-75
+15-->D:\spam\app\src\main\AndroidManifest.xml:9:22-72
+16
+17    <permission
+17-->[androidx.core:core:1.15.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\c6588bfc587b022c12aae3d176e90b37\transformed\core-1.15.0\AndroidManifest.xml:22:5-24:47
+18        android:name="com.safecallai.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+18-->[androidx.core:core:1.15.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\c6588bfc587b022c12aae3d176e90b37\transformed\core-1.15.0\AndroidManifest.xml:23:9-81
+19        android:protectionLevel="signature" />
+19-->[androidx.core:core:1.15.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\c6588bfc587b022c12aae3d176e90b37\transformed\core-1.15.0\AndroidManifest.xml:24:9-44
+20
+21    <uses-permission android:name="com.safecallai.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+21-->[androidx.core:core:1.15.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\c6588bfc587b022c12aae3d176e90b37\transformed\core-1.15.0\AndroidManifest.xml:26:5-97
+21-->[androidx.core:core:1.15.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\c6588bfc587b022c12aae3d176e90b37\transformed\core-1.15.0\AndroidManifest.xml:26:22-94
+22
+23    <application
+23-->D:\spam\app\src\main\AndroidManifest.xml:11:5-45:19
+24        android:name="com.safecallai.app.SafeCallApplication"
+24-->D:\spam\app\src\main\AndroidManifest.xml:12:9-44
+25        android:allowBackup="true"
+25-->D:\spam\app\src\main\AndroidManifest.xml:13:9-35
+26        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+26-->[androidx.core:core:1.15.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\c6588bfc587b022c12aae3d176e90b37\transformed\core-1.15.0\AndroidManifest.xml:28:18-86
+27        android:dataExtractionRules="@xml/data_extraction_rules"
+27-->D:\spam\app\src\main\AndroidManifest.xml:14:9-65
+28        android:debuggable="true"
+29        android:extractNativeLibs="false"
+30        android:fullBackupContent="@xml/backup_rules"
+30-->D:\spam\app\src\main\AndroidManifest.xml:15:9-54
+31        android:icon="@mipmap/ic_launcher"
+31-->D:\spam\app\src\main\AndroidManifest.xml:16:9-43
+32        android:label="@string/app_name"
+32-->D:\spam\app\src\main\AndroidManifest.xml:17:9-41
+33        android:roundIcon="@mipmap/ic_launcher_round"
+33-->D:\spam\app\src\main\AndroidManifest.xml:18:9-54
+34        android:supportsRtl="true"
+34-->D:\spam\app\src\main\AndroidManifest.xml:19:9-35
+35        android:theme="@style/Theme.SafeCallAI" >
+35-->D:\spam\app\src\main\AndroidManifest.xml:20:9-48
+36        <activity
+36-->D:\spam\app\src\main\AndroidManifest.xml:23:9-33:20
+37            android:name="com.safecallai.app.MainActivity"
+37-->D:\spam\app\src\main\AndroidManifest.xml:24:13-41
+38            android:exported="true"
+38-->D:\spam\app\src\main\AndroidManifest.xml:25:13-36
+39            android:label="@string/app_name"
+39-->D:\spam\app\src\main\AndroidManifest.xml:26:13-45
+40            android:theme="@style/Theme.SafeCallAI"
+40-->D:\spam\app\src\main\AndroidManifest.xml:27:13-52
+41            android:windowSoftInputMode="adjustResize" >
+41-->D:\spam\app\src\main\AndroidManifest.xml:28:13-55
+42            <intent-filter>
+42-->D:\spam\app\src\main\AndroidManifest.xml:29:13-32:29
+43                <action android:name="android.intent.action.MAIN" />
+43-->D:\spam\app\src\main\AndroidManifest.xml:30:17-69
+43-->D:\spam\app\src\main\AndroidManifest.xml:30:25-66
+44
+45                <category android:name="android.intent.category.LAUNCHER" />
+45-->D:\spam\app\src\main\AndroidManifest.xml:31:17-77
+45-->D:\spam\app\src\main\AndroidManifest.xml:31:27-74
+46            </intent-filter>
+47        </activity>
+48
+49        <!-- Android CallScreeningService declaration -->
+50        <service
+50-->D:\spam\app\src\main\AndroidManifest.xml:36:9-43:19
+51            android:name="com.safecallai.app.service.SafeCallScreeningService"
+51-->D:\spam\app\src\main\AndroidManifest.xml:37:13-61
+52            android:exported="true"
+52-->D:\spam\app\src\main\AndroidManifest.xml:39:13-36
+53            android:permission="android.permission.BIND_SCREEN_CALL_SERVICE" >
+53-->D:\spam\app\src\main\AndroidManifest.xml:38:13-77
+54            <intent-filter>
+54-->D:\spam\app\src\main\AndroidManifest.xml:40:13-42:29
+55                <action android:name="android.telecom.CallScreeningService" />
+55-->D:\spam\app\src\main\AndroidManifest.xml:41:17-79
+55-->D:\spam\app\src\main\AndroidManifest.xml:41:25-76
+56            </intent-filter>
+57        </service>
+58
+59        <provider
+59-->[androidx.emoji2:emoji2:1.3.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\e9be49594a7a661ec621c48685e25859\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+60            android:name="androidx.startup.InitializationProvider"
+60-->[androidx.emoji2:emoji2:1.3.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\e9be49594a7a661ec621c48685e25859\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
+61            android:authorities="com.safecallai.app.androidx-startup"
+61-->[androidx.emoji2:emoji2:1.3.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\e9be49594a7a661ec621c48685e25859\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
+62            android:exported="false" >
+62-->[androidx.emoji2:emoji2:1.3.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\e9be49594a7a661ec621c48685e25859\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
+63            <meta-data
+63-->[androidx.emoji2:emoji2:1.3.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\e9be49594a7a661ec621c48685e25859\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+64                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+64-->[androidx.emoji2:emoji2:1.3.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\e9be49594a7a661ec621c48685e25859\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+65                android:value="androidx.startup" />
+65-->[androidx.emoji2:emoji2:1.3.0] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\e9be49594a7a661ec621c48685e25859\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+66            <meta-data
+66-->[androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\20633275eeb6728b6f138e6e61b5905f\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:29:13-31:52
+67                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+67-->[androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\20633275eeb6728b6f138e6e61b5905f\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:30:17-78
+68                android:value="androidx.startup" />
+68-->[androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\20633275eeb6728b6f138e6e61b5905f\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:31:17-49
+69            <meta-data
+69-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
+70                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+70-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
+71                android:value="androidx.startup" />
+71-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
+72        </provider>
+73
+74        <activity
+74-->[androidx.compose.ui:ui-tooling-android:1.7.5] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\833dc78812a571deb59743164cc56d42\transformed\ui-tooling-release\AndroidManifest.xml:23:9-25:39
+75            android:name="androidx.compose.ui.tooling.PreviewActivity"
+75-->[androidx.compose.ui:ui-tooling-android:1.7.5] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\833dc78812a571deb59743164cc56d42\transformed\ui-tooling-release\AndroidManifest.xml:24:13-71
+76            android:exported="true" />
+76-->[androidx.compose.ui:ui-tooling-android:1.7.5] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\833dc78812a571deb59743164cc56d42\transformed\ui-tooling-release\AndroidManifest.xml:25:13-36
+77
+78        <receiver
+78-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
+79            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+79-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
+80            android:directBootAware="false"
+80-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
+81            android:enabled="true"
+81-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
+82            android:exported="true"
+82-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
+83            android:permission="android.permission.DUMP" >
+83-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
+84            <intent-filter>
+84-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
+85                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+85-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
+85-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
+86            </intent-filter>
+87            <intent-filter>
+87-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
+88                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+88-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
+88-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
+89            </intent-filter>
+90            <intent-filter>
+90-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
+91                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+91-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
+91-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
+92            </intent-filter>
+93            <intent-filter>
+93-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
+94                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+94-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
+94-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\YAGNADEEPSINH\.gradle\caches\8.13\transforms\19e20518c7a04f9161f8e0f935442db7\transformed\profileinstaller-1.3.1\AndroidManifest.xml:50:25-92
+95            </intent-filter>
+96        </receiver>
+97    </application>
+98
+99</manifest>

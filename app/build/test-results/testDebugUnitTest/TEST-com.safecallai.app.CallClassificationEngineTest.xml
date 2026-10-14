@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.safecallai.app.CallClassificationEngineTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-13T11:21:53.109Z" hostname="LAPTOP-L6I9BESR" time="0.037">
+  <properties/>
+  <testcase name="testCase4_CallerWithManyCredibleSpamReports" classname="com.safecallai.app.CallClassificationEngineTest" time="0.027"/>
+  <testcase name="testCase11_ReportedImpersonationOverridesBusinessListing" classname="com.safecallai.app.CallClassificationEngineTest" time="0.0"/>
+  <testcase name="testCase7_ActiveDeliveryVerifiedPartner_FalseSpamRecovery" classname="com.safecallai.app.CallClassificationEngineTest" time="0.0"/>
+  <testcase name="testCase2_LegitimateBusinessWithOutdatedSpamReport_FalseSpamRecovery" classname="com.safecallai.app.CallClassificationEngineTest" time="0.002"/>
+  <testcase name="testCase3_UnknownCaller" classname="com.safecallai.app.CallClassificationEngineTest" time="0.0"/>
+  <testcase name="testCase9_InvalidOrIncompletePhoneNumber" classname="com.safecallai.app.CallClassificationEngineTest" time="0.003"/>
+  <testcase name="testCase6_DeliveryClaimWithoutIndependentVerification" classname="com.safecallai.app.CallClassificationEngineTest" time="0.001"/>
+  <testcase name="testCase5_UserTrustedNumberWithContradictoryEvidence" classname="com.safecallai.app.CallClassificationEngineTest" time="0.0"/>
+  <testcase name="testCase8_UnavailableBackend_FailsSafely" classname="com.safecallai.app.CallClassificationEngineTest" time="0.0"/>
+  <testcase name="testCase10_StaleOrExpiredVerificationInformation" classname="com.safecallai.app.CallClassificationEngineTest" time="0.0"/>
+  <testcase name="testCase1_VerifiedBusinessWithNoSuspiciousReports" classname="com.safecallai.app.CallClassificationEngineTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

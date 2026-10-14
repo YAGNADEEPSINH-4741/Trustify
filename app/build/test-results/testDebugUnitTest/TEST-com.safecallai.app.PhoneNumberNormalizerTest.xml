@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.safecallai.app.PhoneNumberNormalizerTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-13T11:21:53.147Z" hostname="LAPTOP-L6I9BESR" time="0.001">
+  <properties/>
+  <testcase name="testNormalization_standard10Digit" classname="com.safecallai.app.PhoneNumberNormalizerTest" time="0.0"/>
+  <testcase name="testNormalization_withParentheses" classname="com.safecallai.app.PhoneNumberNormalizerTest" time="0.001"/>
+  <testcase name="testNormalization_withLeadingZero" classname="com.safecallai.app.PhoneNumberNormalizerTest" time="0.0"/>
+  <testcase name="testValidation" classname="com.safecallai.app.PhoneNumberNormalizerTest" time="0.0"/>
+  <testcase name="testNormalization_withSpacesAndDashes" classname="com.safecallai.app.PhoneNumberNormalizerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

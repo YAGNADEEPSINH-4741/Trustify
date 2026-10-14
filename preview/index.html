@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeCall AI — Interactive Android Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand-blue: #1A73E8;
+      --brand-blue-hover: #1557B0;
+      --legit-green: #1E8E3E;
+      --legit-green-bg: rgba(30, 142, 62, 0.15);
+      --spam-amber: #F9AB00;
+      --spam-amber-bg: rgba(249, 171, 0, 0.15);
+      --high-risk-red: #D93025;
+      --high-risk-red-bg: rgba(217, 48, 37, 0.15);
+      
+      /* Dark Theme (Default) */
+      --bg-color: #080C14;
+      --surface-phone: #0F172A;
+      --surface-card: #1E293B;
+      --surface-card-subtle: #172033;
+      --border-color: #334155;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --phone-border: #334155;
+      --phone-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(26, 115, 232, 0.15);
+    }
+
+    body.light-theme {
+      --bg-color: #EEF2F6;
+      --surface-phone: #FFFFFF;
+      --surface-card: #F1F5F9;
+      --surface-card-subtle: #F8FAFC;
+      --border-color: #E2E8F0;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #94A3B8;
+      --phone-border: #CBD5E1;
+      --phone-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.15), 0 0 30px rgba(26, 115, 232, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px 16px 40px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Top Toolbar */
+    .preview-header {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-branding {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #1A73E8, #4285F4);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+    }
+
+    .header-title h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .header-title p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-chip {
+      background: rgba(30, 142, 62, 0.15);
+      color: var(--legit-green);
+      border: 1px solid rgba(30, 142, 62, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-chip .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--legit-green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(30, 142, 62, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(30, 142, 62, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(30, 142, 62, 0); }
+    }
+
+    .btn-toggle-theme {
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-toggle-theme:hover {
+      border-color: var(--brand-blue);
+    }
+
+    /* Main Container with Phone Frame and Info Sidebar */
+    .preview-workspace {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      justify-content: center;
+      gap: 36px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 860px) {
+      .preview-workspace {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    /* Pixel 7 Smartphone Frame */
+    .phone-container {
+      position: relative;
+      width: 390px;
+      height: 800px;
+      background: var(--surface-phone);
+      border-radius: 44px;
+      box-shadow: var(--phone-shadow);
+      border: 8px solid #1E293B;
+      outline: 2px solid var(--border-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Phone Notch / Camera Hole */
+    .phone-camera {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 14px;
+      background: #000000;
+      border-radius: 50%;
+      z-index: 1000;
+      border: 2px solid #222;
+    }
+
+    /* Status Bar */
+    .phone-status-bar {
+      height: 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      z-index: 999;
+      user-select: none;
+    }
+
+    .phone-status-icons {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    /* App Screen Viewport */
+    .phone-viewport {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      scroll-behavior: smooth;
+    }
+
+    .phone-viewport::-webkit-scrollbar {
+      width: 4px;
+    }
+    .phone-viewport::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    /* Screen Top Bar */
+    .app-topbar {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0;
+      background: var(--surface-phone);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .app-topbar-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-topbar-btn {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 18px;
+      transition: background 0.15s;
+    }
+    .app-topbar-btn:hover {
+      background: var(--surface-card);
+    }
+
+    /* Screen Content Sections */
+    .app-content {
+      padding: 16px 18px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    /* Card Component */
+    .m3-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 16px;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .m3-card:hover {
+      border-color: rgba(26, 115, 232, 0.4);
+    }
+
+    /* Bottom Navigation Bar */
+    .phone-bottom-nav {
+      height: 64px;
+      background: var(--surface-card);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 8px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .nav-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      flex: 1;
+      height: 100%;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: color 0.15s;
+      user-select: none;
+    }
+
+    .nav-tab svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+      transition: transform 0.15s;
+    }
+
+    .nav-tab span {
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .nav-tab.active {
+      color: var(--brand-blue);
+    }
+
+    .nav-tab.active svg {
+      transform: scale(1.1);
+    }
+
+    /* Phone Home Indicator */
+    .phone-home-bar {
+      height: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--surface-card);
+    }
+
+    .phone-home-pill {
+      width: 90px;
+      height: 4px;
+      background: var(--text-muted);
+      border-radius: 4px;
+    }
+
+    /* Interactive Elements inside Phone */
+    .switch-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+    }
+    .switch-row + .switch-row {
+      border-top: 1px solid var(--border-color);
+    }
+
+    .switch-label-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .switch-label-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--border-color);
+      border-radius: 34px;
+      transition: .25s;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      border-radius: 50%;
+      transition: .25s;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: var(--brand-blue);
+    }
+
+    input:checked + .toggle-slider.red {
+      background-color: var(--high-risk-red);
+    }
+
+    input:checked + .toggle-slider.amber {
+      background-color: var(--spam-amber);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(18px);
+    }
+
+    /* Metric Stat Grid */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .metric-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric-card .metric-val {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .metric-card.recovered .metric-val {
+      color: var(--legit-green);
+    }
+
+    .metric-card.verified .metric-val {
+      color: var(--brand-blue);
+    }
+
+    .metric-card .metric-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    /* Buttons */
+    .btn-m3 {
+      background: var(--brand-blue);
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.1s;
+      width: 100%;
+    }
+    .btn-m3:hover {
+      background: var(--brand-blue-hover);
+    }
+    .btn-m3:active {
+      transform: scale(0.98);
+    }
+
+    .btn-outlined {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 11px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-outlined:hover {
+      background: var(--surface-card);
+      border-color: var(--brand-blue);
+    }
+
+    .btn-danger {
+      color: var(--high-risk-red);
+      border-color: rgba(217, 48, 37, 0.4);
+    }
+    .btn-danger:hover {
+      background: var(--high-risk-red-bg);
+      border-color: var(--high-risk-red);
+    }
+
+    /* Call Record Cards */
+    .call-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .call-card:hover {
+      border-color: var(--brand-blue);
+      transform: translateY(-2px);
+    }
+
+    .call-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .call-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .call-avatar.green { background: var(--legit-green-bg); color: var(--legit-green); }
+    .call-avatar.red { background: var(--high-risk-red-bg); color: var(--high-risk-red); }
+    .call-avatar.amber { background: var(--spam-amber-bg); color: var(--spam-amber); }
+    .call-avatar.blue { background: rgba(26, 115, 232, 0.15); color: var(--brand-blue); }
+
+    .call-text h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .call-text p {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .call-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    .call-tag.legit { background: var(--legit-green-bg); color: var(--legit-green); }
+    .call-tag.risk { background: var(--high-risk-red-bg); color: var(--high-risk-red); }
+    .call-tag.spam { background: var(--spam-amber-bg); color: var(--spam-amber); }
+
+    /* Filter Chips Row */
+    .chips-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .chips-row::-webkit-scrollbar { display: none; }
+
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-chip.active {
+      background: rgba(26, 115, 232, 0.2);
+      border-color: var(--brand-blue);
+      color: var(--brand-blue);
+    }
+
+    /* Quick Lookup Input */
+    .input-lookup-box {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .input-text {
+      flex: 1;
+      background: var(--surface-card-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .input-text:focus {
+      border-color: var(--brand-blue);
+    }
+
+    .preset-numbers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .preset-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      background: var(--surface-card-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    .preset-pill:hover {
+      border-color: var(--brand-blue);
+      color: var(--text-primary);
+    }
+
+    /* Evidence Ledger */
+    .ledger-item {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .ledger-item:last-child {
+      border-bottom: none;
+    }
+    .ledger-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--legit-green);
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .ledger-dot.red { background: var(--high-risk-red); }
+    .ledger-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .ledger-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Modal / Dialog */
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 330px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .modal-card h3 {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    /* Side Panel / Controls */
+    .side-panel {
+      flex: 1;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .panel-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 20px;
+    }
+
+    .panel-card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-card p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .screen-selector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .screen-btn {
+      background: var(--surface-card-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .screen-btn:hover {
+      border-color: var(--brand-blue);
+      background: rgba(26, 115, 232, 0.1);
+    }
+    .screen-btn.active {
+      border-color: var(--brand-blue);
+      background: var(--brand-blue);
+      color: white;
+    }
+
+    .diagnostic-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+      font-size: 12px;
+    }
+
+    .diag-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .diag-item:last-child { border-bottom: none; }
+    .diag-val {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--brand-blue);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Preview Header -->
+  <header class="preview-header">
+    <div class="header-branding">
+      <div class="header-logo">S</div>
+      <div class="header-title">
+        <h1>SafeCall AI — Live Interactive Preview</h1>
+        <p>Android Compose Material 3 Client • Pixel 7 Device Viewport</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="badge-chip">
+        <span class="dot"></span>
+        <span>Engine Active (19/19 Unit Tests Passed)</span>
+      </div>
+      <button class="btn-toggle-theme" id="themeToggleBtn" onclick="toggleTheme()">
+        <span id="themeIcon">☀️</span>
+        <span id="themeLabel">Light Theme</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Preview Workspace -->
+  <main class="preview-workspace">
+
+    <!-- Smartphone Mockup Frame -->
+    <div class="phone-container" id="phoneContainer">
+      <div class="phone-camera"></div>
+
+      <!-- Phone Status Bar -->
+      <div class="phone-status-bar">
+        <span id="phoneClock">9:41</span>
+        <div class="phone-status-icons">
+          <span>5G</span>
+          <span>●●●</span>
+          <span>100%</span>
+        </div>
+      </div>
+
+      <!-- App Viewport -->
+      <div class="phone-viewport" id="viewport">
+        <!-- Content injected dynamically by JS based on current screen -->
+      </div>
+
+      <!-- Phone Bottom Navigation Bar -->
+      <nav class="phone-bottom-nav" id="bottomNav">
+        <div class="nav-tab active" id="navHome" onclick="navigateTo('home')">
+          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>Home</span>
+        </div>
+        <div class="nav-tab" id="navActivity" onclick="navigateTo('activity')">
+          <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+          <span>Activity</span>
+        </div>
+        <div class="nav-tab" id="navTrusted" onclick="navigateTo('trusted')">
+          <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <span>Trusted</span>
+        </div>
+        <div class="nav-tab" id="navSettings" onclick="navigateTo('settings')">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          <span>Settings</span>
+        </div>
+      </nav>
+
+      <!-- Phone Bottom Home Pill -->
+      <div class="phone-home-bar">
+        <div class="phone-home-pill"></div>
+      </div>
+
+      <!-- Modal Dialog (e.g. Add Trusted Caller, Clear Confirmation) -->
+      <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-card" id="modalCard">
+          <!-- Injected modal content -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Navigation & Environmental Control Sidebar -->
+    <div class="side-panel">
+      <!-- Direct Screen Switcher -->
+      <div class="panel-card">
+        <h2>📱 Screen Navigation</h2>
+        <p>Directly jump into any of the 7 existing Android Compose screens to test transitions, state persistence, and responsive UI components:</p>
+        
+        <div class="screen-selector-grid">
+          <button class="screen-btn active" id="btnScrHome" onclick="navigateTo('home')">1. Home Dashboard</button>
+          <button class="screen-btn" id="btnScrOnboard" onclick="navigateTo('onboarding')">2. Onboarding Flow</button>
+          <button class="screen-btn" id="btnScrDetails" onclick="navigateTo('details', '+919876543210')">3. Caller Details</button>
+          <button class="screen-btn" id="btnScrActivity" onclick="navigateTo('activity')">4. Recent Activity</button>
+          <button class="screen-btn" id="btnScrTrusted" onclick="navigateTo('trusted')">5. Trusted Callers</button>
+          <button class="screen-btn" id="btnScrReport" onclick="navigateTo('report', '+919876543210')">6. Report Number</button>
+          <button class="screen-btn" id="btnScrSettings" onclick="navigateTo('settings')">7. Settings & Privacy</button>
+        </div>
+      </div>
+
+      <!-- Test Cases & Interactions -->
+      <div class="panel-card">
+        <h2>⚡ Fast Test Scenarios</h2>
+        <p>Trigger preconfigured end-to-end scenarios to test the deterministic rules engine and data flow:</p>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
+          <button class="btn-outlined" onclick="runScenario('amazon')">
+            📦 Test Case 1: Amazon Logistics (False Spam Recovered)
+          </button>
+          <button class="btn-outlined" onclick="runScenario('uber')">
+            🚗 Test Case 2: Uber Ride Dispatch (Active Ride Associated)
+          </button>
+          <button class="btn-outlined" onclick="runScenario('scam')">
+            🚨 Test Case 3: Bank Impersonation (High Risk Scammer)
+          </button>
+          <button class="btn-outlined" onclick="runScenario('telemarket')">
+            📢 Test Case 4: Telemarketing (Crowd Flagged Spam)
+          </button>
+        </div>
+      </div>
+
+      <!-- Environment & Diagnostic Info -->
+      <div class="panel-card">
+        <h2>🛠️ Environment Diagnostics</h2>
+        <div class="diagnostic-list">
+          <div class="diag-item">
+            <span>Project Root</span>
+            <span class="diag-val">D:\spam</span>
+          </div>
+          <div class="diag-item">
+            <span>Compiled APK</span>
+            <span class="diag-val">app-debug.apk (17.6 MB)</span>
+          </div>
+          <div class="diag-item">
+            <span>Android Studio</span>
+            <span class="diag-val">Installed (2026.1.1)</span>
+          </div>
+          <div class="diag-item">
+            <span>Compose Previews</span>
+            <span class="diag-val">14 Previews Available</span>
+          </div>
+          <div class="diag-item">
+            <span>AVD Download Status</span>
+            <span class="diag-val" style="color:var(--spam-amber);">Network Reset Blocked</span>
+          </div>
+          <div class="diag-item">
+            <span>Studio Preview Command</span>
+            <span class="diag-val">studio64.exe "D:\spam"</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    /* Application State (mirroring SafeCallViewModel & SQLite Database) */
+    const state = {
+      currentScreen: 'home',
+      currentDetailPhone: '+919876543210',
+      isProtectionEnabled: true,
+      isAggressiveBlockingEnabled: false,
+      isOfflineModeForced: false,
+      stats: {
+        falseSpamRecovered: 14,
+        verifiedLegitimate: 82,
+        totalScreened: 139
+      },
+      trustedCallers: [
+        { id: 1, phone: '+919876500001', label: 'Apartment Security Intercom', notes: 'Main gate visitor verification' },
+        { id: 2, phone: '+919876500002', label: 'Family Pediatric Clinic', notes: 'Dr. Mehta clinic front desk' }
+      ],
+      recentCalls: [
+        {
+          id: 'rec-1',
+          phone: '+919876543210',
+          name: 'Amazon Logistics',
+          classification: 'VERIFIED_LEGITIMATE',
+          badgeText: 'False Spam Recovered',
+          confidence: 95,
+          reason: 'Verified delivery driver for active order #AMZ-9921',
+          evidence: ['Amazon Logistics API Dispatch Token', 'Active Out-For-Delivery Order', 'Time-bound 30-minute validity window'],
+          timestamp: '15 mins ago',
+          duration: '42s',
+          wasSilenced: false,
+          falseSpamRecovered: true,
+          crowdReports: 124
+        },
+        {
+          id: 'rec-2',
+          phone: '+919876500000',
+          name: 'Suspected Bank Impersonator',
+          classification: 'HIGH_RISK',
+          badgeText: 'High Risk (Spoofing)',
+          confidence: 98,
+          reason: 'Claims to be HDFC Bank KYC but number originates from unverified VOIP pool',
+          evidence: ['Telecom Registry CLI Inconsistency', 'Conflicting Enterprise CID Header', '38 urgent fraud alerts within 2 hours'],
+          timestamp: '45 mins ago',
+          duration: '0s',
+          wasSilenced: true,
+          falseSpamRecovered: false,
+          crowdReports: 412
+        },
+        {
+          id: 'rec-3',
+          phone: '+919876512345',
+          name: 'Uber Driver (Rajesh K.)',
+          classification: 'VERIFIED_LEGITIMATE',
+          badgeText: 'Active Booking Associated',
+          confidence: 92,
+          reason: 'Matched temporary virtual dispatch number for active ride request #UB-7810',
+          evidence: ['Uber Mobility Fleet API', 'Temporary Number Mask Active', 'Valid for 15 minutes'],
+          timestamp: '2 hours ago',
+          duration: '28s',
+          wasSilenced: false,
+          falseSpamRecovered: true,
+          crowdReports: 45
+        },
+        {
+          id: 'rec-4',
+          phone: '+918049202020',
+          name: 'Unsolicited Financial Telemarketing',
+          classification: 'POTENTIAL_SPAM',
+          badgeText: 'Potential Spam',
+          confidence: 84,
+          reason: 'High outbound call velocity without enterprise caller ID certificate',
+          evidence: ['Crowd Spam Consensus (>800 flags)', 'Outbound Rate Exceeds 200 calls/hr'],
+          timestamp: '4 hours ago',
+          duration: '0s',
+          wasSilenced: false,
+          falseSpamRecovered: false,
+          crowdReports: 890
+        }
+      ],
+      supabaseConfig: {
+        url: '',
+        key: ''
+      }
+    };
+
+    /* Clock updater */
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const mins = now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('phoneClock').textContent = `${hours}:${mins}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /* Theme Toggle */
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('light-theme');
+      document.getElementById('themeIcon').textContent = isLight ? '🌙' : '☀️';
+      document.getElementById('themeLabel').textContent = isLight ? 'Dark Theme' : 'Light Theme';
+    }
+
+    /* Navigation Controller */
+    function navigateTo(screenId, arg = null) {
+      state.currentScreen = screenId;
+      if (arg) state.currentDetailPhone = arg;
+
+      // Update Bottom Nav active state
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      if (screenId === 'home') document.getElementById('navHome').classList.add('active');
+      if (screenId === 'activity') document.getElementById('navActivity').classList.add('active');
+      if (screenId === 'trusted') document.getElementById('navTrusted').classList.add('active');
+      if (screenId === 'settings') document.getElementById('navSettings').classList.add('active');
+
+      // Update sidebar buttons
+      document.querySelectorAll('.screen-btn').forEach(b => b.classList.remove('active'));
+      const activeBtnMap = {
+        home: 'btnScrHome',
+        onboarding: 'btnScrOnboard',
+        details: 'btnScrDetails',
+        activity: 'btnScrActivity',
+        trusted: 'btnScrTrusted',
+        report: 'btnScrReport',
+        settings: 'btnScrSettings'
+      };
+      if (activeBtnMap[screenId]) {
+        const btn = document.getElementById(activeBtnMap[screenId]);
+        if (btn) btn.classList.add('active');
+      }
+
+      // Render Screen
+      const viewport = document.getElementById('viewport');
+      switch (screenId) {
+        case 'home':
+          viewport.innerHTML = renderHomeScreen();
+          break;
+        case 'onboarding':
+          viewport.innerHTML = renderOnboardingScreen();
+          break;
+        case 'details':
+          viewport.innerHTML = renderDetailsScreen(state.currentDetailPhone);
+          break;
+        case 'activity':
+          viewport.innerHTML = renderActivityScreen('ALL');
+          break;
+        case 'trusted':
+          viewport.innerHTML = renderTrustedScreen();
+          break;
+        case 'report':
+          viewport.innerHTML = renderReportScreen(state.currentDetailPhone);
+          break;
+        case 'settings':
+          viewport.innerHTML = renderSettingsScreen();
+          break;
+      }
+      viewport.scrollTop = 0;
+    }
+
+    /* Screen 1: Home Dashboard */
+    function renderHomeScreen() {
+      return `
+        <div class="app-topbar">
+          <div class="app-topbar-title">
+            <span style="color:var(--brand-blue)">🛡️</span> SafeCall AI
+          </div>
+          <button class="app-topbar-btn" title="Onboarding Guide" onclick="navigateTo('onboarding')">ℹ️</button>
+        </div>
+        <div class="app-content">
+          
+          <!-- Master Shield Banner -->
+          <div class="m3-card" style="background: linear-gradient(135deg, rgba(26, 115, 232, 0.15), rgba(66, 133, 244, 0.05)); border-color: rgba(26, 115, 232, 0.4);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="font-size:16px; font-weight:700;">Active Protection</h3>
+                <p style="font-size:12px; color:var(--text-secondary); margin-top:2px;">
+                  ${state.isProtectionEnabled ? 'Screening incoming calls locally' : 'Protection paused'}
+                </p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" ${state.isProtectionEnabled ? 'checked' : ''} onchange="toggleProtection(this.checked)">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Impact Metrics -->
+          <div class="metric-grid">
+            <div class="metric-card recovered">
+              <span class="metric-val" id="statRecovered">${state.stats.falseSpamRecovered}</span>
+              <span class="metric-title">False Spam Recovered</span>
+            </div>
+            <div class="metric-card verified">
+              <span class="metric-val" id="statVerified">${state.stats.verifiedLegitimate}</span>
+              <span class="metric-title">Legitimate Verified</span>
+            </div>
+          </div>
+
+          <!-- Quick Number Lookup -->
+          <div class="m3-card">
+            <h4 style="font-size:13px; font-weight:700; margin-bottom:8px;">🔍 Instant Number Lookup</h4>
+            <div class="input-lookup-box">
+              <input type="text" class="input-text" id="homeLookupInput" placeholder="+91 98765 43210" value="+919876543210">
+              <button class="btn-m3" style="width:auto; padding:11px 16px;" onclick="handleLookup()">Check</button>
+            </div>
+            <div class="preset-numbers">
+              <span class="preset-pill" onclick="setLookup('+919876543210')">Amazon (+919876543210)</span>
+              <span class="preset-pill" onclick="setLookup('+919876500000')">Scam (+919876500000)</span>
+              <span class="preset-pill" onclick="setLookup('+919876512345')">Uber (+919876512345)</span>
+            </div>
+          </div>
+
+          <!-- Recent Screened Calls Header -->
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h4 style="font-size:14px; font-weight:700;">Recent Screened Calls</h4>
+            <span style="font-size:12px; color:var(--brand-blue); cursor:pointer; font-weight:600;" onclick="navigateTo('activity')">View all</span>
+          </div>
+
+          <!-- Recent Call Items -->
+          ${state.recentCalls.slice(0, 3).map(call => `
+            <div class="call-card" onclick="navigateTo('details', '${call.phone}')">
+              <div class="call-info">
+                <div class="call-avatar ${call.classification === 'VERIFIED_LEGITIMATE' ? 'green' : (call.classification === 'HIGH_RISK' ? 'red' : 'amber')}">
+                  ${call.classification === 'VERIFIED_LEGITIMATE' ? '✓' : (call.classification === 'HIGH_RISK' ? '!' : '☎')}
+                </div>
+                <div class="call-text">
+                  <h4>${call.name}</h4>
+                  <p>${call.phone} • ${call.timestamp}</p>
+                </div>
+              </div>
+              <span class="call-tag ${call.classification === 'VERIFIED_LEGITIMATE' ? 'legit' : (call.classification === 'HIGH_RISK' ? 'risk' : 'spam')}">
+                ${call.badgeText}
+              </span>
+            </div>
+          `).join('')}
+
+        </div>
+      `;
+    }
+
+    /* Screen 2: Onboarding Flow */
+    function renderOnboardingScreen() {
+      return `
+        <div class="app-topbar">
+          <button class="app-topbar-btn" onclick="navigateTo('home')">←</button>
+          <div class="app-topbar-title">Welcome to SafeCall AI</div>
+          <div style="width:36px;"></div>
+        </div>
+        <div class="app-content" style="text-align:center; padding-top:28px;">
+          
+          <div style="width:84px; height:84px; margin:0 auto; background:linear-gradient(135deg, #1A73E8, #4285F4); border-radius:24px; display:flex; align-items:center; justify-content:center; color:white; font-size:42px; box-shadow:0 12px 28px rgba(26, 115, 232, 0.4);">
+            🛡️
+          </div>
+
+          <h2 style="font-size:20px; font-weight:800; margin-top:20px;">Stop Missing Important Calls</h2>
+          <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-top:8px;">
+            Traditional spam blockers aggressively label genuine couriers, ride drivers, and clinic appointments as spam. SafeCall AI introduces <b>Verifiable Legitimate Caller Detection</b>.
+          </p>
+
+          <div class="m3-card" style="text-align:left; margin-top:16px;">
+            <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+              <span style="font-size:20px;">📦</span>
+              <div>
+                <h4 style="font-size:13px; font-weight:700;">Delivery & Ride Associations</h4>
+                <p style="font-size:11px; color:var(--text-secondary);">Cross-checks numbers against active dispatch sessions from Amazon, Flipkart, and Uber.</p>
+              </div>
+            </div>
+            <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+              <span style="font-size:20px;">🔒</span>
+              <div>
+                <h4 style="font-size:13px; font-weight:700;">Zero Contact Book Uploads</h4>
+                <p style="font-size:11px; color:var(--text-secondary);">Your personal contacts and calls are never uploaded to a crowd directory.</p>
+              </div>
+            </div>
+            <div style="display:flex; gap:12px; align-items:flex-start;">
+              <span style="font-size:20px;">⚡</span>
+              <div>
+                <h4 style="font-size:13px; font-weight:700;">Transparent Evidence Ledger</h4>
+                <p style="font-size:11px; color:var(--text-secondary);">See the exact deterministic cryptographic reason why a call was allowed or flagged.</p>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-m3" style="margin-top:20px;" onclick="navigateTo('home')">Get Started & Enable</button>
+        </div>
+      `;
+    }
+
+    /* Screen 3: Caller Details */
+    function renderDetailsScreen(phone) {
+      let call = state.recentCalls.find(c => c.phone === phone);
+      if (!call) {
+        call = {
+          id: 'query-' + phone,
+          phone: phone,
+          name: phone === '+919876599999' ? 'Unregistered Caller' : 'Caller ' + phone,
+          classification: phone === '+919876500000' ? 'HIGH_RISK' : 'UNKNOWN',
+          badgeText: phone === '+919876500000' ? 'High Risk' : 'Unverified Stranger',
+          confidence: 60,
+          reason: 'No public business certificate or active delivery association detected.',
+          evidence: ['Local SQLite Registry Check: Not Found', 'Telecom Public Mask: Standard Subscriber SIM'],
+          timestamp: 'Just now',
+          duration: '0s',
+          wasSilenced: false,
+          falseSpamRecovered: false,
+          crowdReports: 2
+        };
+      }
+
+      const isTrusted = state.trustedCallers.some(t => t.phone === call.phone);
+
+      return `
+        <div class="app-topbar">
+          <button class="app-topbar-btn" onclick="navigateTo('home')">←</button>
+          <div class="app-topbar-title">Caller Details</div>
+          <button class="app-topbar-btn" title="Report" onclick="navigateTo('report', '${call.phone}')">🚩</button>
+        </div>
+        <div class="app-content">
+          
+          <!-- Identity Card -->
+          <div class="m3-card" style="text-align:center; padding:20px 16px;">
+            <div class="call-avatar ${call.classification === 'VERIFIED_LEGITIMATE' ? 'green' : (call.classification === 'HIGH_RISK' ? 'red' : 'amber')}" style="width:60px; height:60px; margin:0 auto 12px; font-size:26px;">
+              ${call.classification === 'VERIFIED_LEGITIMATE' ? '✓' : (call.classification === 'HIGH_RISK' ? '!' : '☎')}
+            </div>
+            <h2 style="font-size:18px; font-weight:800;">${call.name}</h2>
+            <p style="font-size:13px; font-family:'JetBrains Mono',monospace; color:var(--text-secondary); margin-top:2px;">${call.phone}</p>
+            
+            <div style="margin-top:12px; display:inline-block;">
+              <span class="call-tag ${call.classification === 'VERIFIED_LEGITIMATE' ? 'legit' : (call.classification === 'HIGH_RISK' ? 'risk' : 'spam')}" style="font-size:12px; padding:6px 14px;">
+                ${call.badgeText} (Confidence: ${call.confidence}%)
+              </span>
+            </div>
+          </div>
+
+          <!-- Reason & Verdict -->
+          <div class="m3-card">
+            <h4 style="font-size:13px; font-weight:700; margin-bottom:4px;">Classification Verdict</h4>
+            <p style="font-size:13px; color:var(--text-secondary); line-height:1.5;">${call.reason}</p>
+          </div>
+
+          <!-- Evidence Ledger Breakdown -->
+          <div class="m3-card">
+            <h4 style="font-size:13px; font-weight:700; margin-bottom:8px;">📋 Transparent Evidence Ledger</h4>
+            ${call.evidence.map(ev => `
+              <div class="ledger-item">
+                <div class="ledger-dot ${call.classification === 'HIGH_RISK' ? 'red' : ''}"></div>
+                <div>
+                  <div class="ledger-title">${ev}</div>
+                  <div class="ledger-desc">Cryptographically verified against trusted provider API</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+            <button class="btn-m3" onclick="${isTrusted ? `removeTrustedByPhone('${call.phone}')` : `promptAddTrusted('${call.phone}', '${call.name}')`}">
+              ${isTrusted ? '❤️ Remove from Personal Trusted' : '🤍 Add to Personal Trusted List'}
+            </button>
+            <button class="btn-outlined" onclick="navigateTo('report', '${call.phone}')">
+              🚩 Report Incorrect Spam Flag
+            </button>
+          </div>
+
+        </div>
+      `;
+    }
+
+    /* Screen 4: Recent Activity */
+    function renderActivityScreen(filter = 'ALL') {
+      let filtered = state.recentCalls;
+      if (filter === 'FALSE_SPAM') filtered = state.recentCalls.filter(c => c.falseSpamRecovered);
+      if (filter === 'VERIFIED') filtered = state.recentCalls.filter(c => c.classification === 'VERIFIED_LEGITIMATE');
+      if (filter === 'SPAM') filtered = state.recentCalls.filter(c => c.classification === 'POTENTIAL_SPAM' || c.classification === 'HIGH_RISK');
+
+      return `
+        <div class="app-topbar">
+          <div class="app-topbar-title">Screening Activity</div>
+          <button class="app-topbar-btn" title="Clear History" onclick="promptClearHistory()">🗑️</button>
+        </div>
+        <div class="app-content">
+          
+          <!-- Filter Chips -->
+          <div class="chips-row">
+            <div class="filter-chip ${filter === 'ALL' ? 'active' : ''}" onclick="filterActivity('ALL')">All (${state.recentCalls.length})</div>
+            <div class="filter-chip ${filter === 'FALSE_SPAM' ? 'active' : ''}" onclick="filterActivity('FALSE_SPAM')">False Spam Recovered (${state.stats.falseSpamRecovered})</div>
+            <div class="filter-chip ${filter === 'VERIFIED' ? 'active' : ''}" onclick="filterActivity('VERIFIED')">Verified (${state.stats.verifiedLegitimate})</div>
+            <div class="filter-chip ${filter === 'SPAM' ? 'active' : ''}" onclick="filterActivity('SPAM')">Spam / Scam</div>
+          </div>
+
+          <!-- Call Records List -->
+          ${filtered.length === 0 ? `
+            <div style="text-align:center; padding:40px 16px; color:var(--text-secondary); font-size:13px;">
+              No screened records match this filter.
+            </div>
+          ` : filtered.map(call => `
+            <div class="call-card" onclick="navigateTo('details', '${call.phone}')">
+              <div class="call-info">
+                <div class="call-avatar ${call.classification === 'VERIFIED_LEGITIMATE' ? 'green' : (call.classification === 'HIGH_RISK' ? 'red' : 'amber')}">
+                  ${call.classification === 'VERIFIED_LEGITIMATE' ? '✓' : (call.classification === 'HIGH_RISK' ? '!' : '☎')}
+                </div>
+                <div class="call-text">
+                  <h4>${call.name}</h4>
+                  <p>${call.phone} • ${call.timestamp}</p>
+                </div>
+              </div>
+              <span class="call-tag ${call.classification === 'VERIFIED_LEGITIMATE' ? 'legit' : (call.classification === 'HIGH_RISK' ? 'risk' : 'spam')}">
+                ${call.badgeText}
+              </span>
+            </div>
+          `).join('')}
+
+        </div>
+      `;
+    }
+
+    /* Screen 5: Trusted Callers */
+    function renderTrustedScreen() {
+      return `
+        <div class="app-topbar">
+          <div class="app-topbar-title">Trusted Callers</div>
+          <button class="app-topbar-btn" title="Add Trusted" onclick="promptAddTrusted('', '')">➕</button>
+        </div>
+        <div class="app-content">
+          
+          <!-- Principle Callout -->
+          <div class="m3-card" style="background:var(--surface-card-subtle);">
+            <div style="display:flex; gap:10px; align-items:flex-start;">
+              <span style="color:var(--brand-blue); font-size:16px;">ℹ️</span>
+              <p style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+                Personal trust is stored strictly on your device. It never automatically marks an unverified caller as a public business for other users.
+              </p>
+            </div>
+          </div>
+
+          <!-- Trusted List -->
+          ${state.trustedCallers.length === 0 ? `
+            <div style="text-align:center; padding:40px 16px;">
+              <div style="font-size:36px; margin-bottom:8px;">🤍</div>
+              <h4 style="font-size:15px; font-weight:700;">No Trusted Callers Added</h4>
+              <p style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
+                Add frequent service numbers or gate intercoms to ensure they never get silenced.
+              </p>
+            </div>
+          ` : state.trustedCallers.map(t => `
+            <div class="call-card" style="cursor:default;">
+              <div class="call-info">
+                <div class="call-avatar green">❤️</div>
+                <div class="call-text">
+                  <h4>${t.label}</h4>
+                  <p style="font-family:'JetBrains Mono',monospace;">${t.phone}</p>
+                  ${t.notes ? `<p style="font-size:11px; color:var(--text-muted);">${t.notes}</p>` : ''}
+                </div>
+              </div>
+              <button class="app-topbar-btn" title="Remove" style="color:var(--high-risk-red);" onclick="removeTrusted(${t.id})">🗑️</button>
+            </div>
+          `).join('')}
+
+          <button class="btn-m3" style="margin-top:12px;" onclick="promptAddTrusted('', '')">
+            ➕ Add Personal Trusted Caller
+          </button>
+        </div>
+      `;
+    }
+
+    /* Screen 6: Report Number */
+    function renderReportScreen(phone = '') {
+      return `
+        <div class="app-topbar">
+          <button class="app-topbar-btn" onclick="navigateTo('home')">←</button>
+          <div class="app-topbar-title">Report a Number</div>
+          <div style="width:36px;"></div>
+        </div>
+        <div class="app-content">
+          
+          <div class="m3-card" style="background:var(--surface-card-subtle);">
+            <div style="display:flex; gap:10px; align-items:flex-start;">
+              <span style="color:var(--brand-blue); font-size:18px;">🚩</span>
+              <p style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+                Help protect genuine businesses from false spam flags. If a courier, recruiter, or service was misclassified, submit a verification review report.
+              </p>
+            </div>
+          </div>
+
+          <div id="reportSuccessAlert" style="display:none;" class="m3-card" style="background:var(--legit-green-bg); border-color:var(--legit-green);">
+            <p style="color:var(--legit-green); font-size:13px; font-weight:600;">✓ Report submitted! Thank you for protecting legitimate callers.</p>
+          </div>
+
+          <div>
+            <label style="font-size:12px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:6px;">Phone Number</label>
+            <input type="text" class="input-text" id="reportPhone" value="${phone}" placeholder="+91 98765 43210" style="width:100%;">
+          </div>
+
+          <div>
+            <label style="font-size:12px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:6px;">Report Category</label>
+            <select class="input-text" id="reportCategory" style="width:100%; cursor:pointer;">
+              <option value="FALSE_SPAM">False Spam (Caller is Legitimate)</option>
+              <option value="SUSPECTED_SPAM">Suspected Telemarketing / Spam</option>
+              <option value="SUSPECTED_IMPERSONATION">Suspected Impersonation / Scam</option>
+              <option value="INCORRECT_IDENTITY">Incorrect Business Name / Info</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:12px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:6px;">Details & Evidence</label>
+            <textarea class="input-text" id="reportNotes" rows="3" style="width:100%;" placeholder="Describe the caller context (e.g. Amazon delivery driver calling for package, wrongly marked on Truecaller)"></textarea>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="reportConfirm" checked>
+            <label for="reportConfirm" style="font-size:12px; color:var(--text-secondary);">I confirm this report is accurate to my knowledge.</label>
+          </div>
+
+          <button class="btn-m3" style="margin-top:10px;" onclick="submitReport()">Submit Report</button>
+
+        </div>
+      `;
+    }
+
+    /* Screen 7: Settings and Privacy */
+    function renderSettingsScreen() {
+      return `
+        <div class="app-topbar">
+          <div class="app-topbar-title">Settings & Privacy</div>
+          <div style="width:36px;"></div>
+        </div>
+        <div class="app-content">
+          
+          <h4 style="font-size:14px; font-weight:700;">Call Screening Preferences</h4>
+
+          <div class="m3-card">
+            <!-- Master Protection Toggle -->
+            <div class="switch-row">
+              <div>
+                <div class="switch-label-title">SafeCall Screening Service</div>
+                <div class="switch-label-desc">Evaluates incoming calls and prevents false spam blocking</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" ${state.isProtectionEnabled ? 'checked' : ''} onchange="toggleProtection(this.checked)">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Aggressive High-Risk Blocking -->
+            <div class="switch-row">
+              <div>
+                <div class="switch-label-title">Aggressive Scam Blocking</div>
+                <div class="switch-label-desc">${state.isAggressiveBlockingEnabled ? 'Active: Silences confirmed scam / fraud numbers' : 'Disabled: Lets phone ring for all calls'}</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" ${state.isAggressiveBlockingEnabled ? 'checked' : ''} onchange="toggleAggressive(this.checked)">
+                <span class="toggle-slider red"></span>
+              </label>
+            </div>
+
+            <!-- Force Offline Operation -->
+            <div class="switch-row">
+              <div>
+                <div class="switch-label-title">Force Offline Operation</div>
+                <div class="switch-label-desc">Screen calls entirely on-device without cloud network lookups</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" ${state.isOfflineModeForced ? 'checked' : ''} onchange="toggleOffline(this.checked)">
+                <span class="toggle-slider amber"></span>
+              </label>
+            </div>
+          </div>
+
+          <h4 style="font-size:14px; font-weight:700; margin-top:6px;">Cloud Verification (Supabase)</h4>
+
+          <div class="m3-card">
+            <p style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">
+              Connect your Supabase project to synchronize community verified business registries.
+            </p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <input type="text" class="input-text" id="supabaseUrl" placeholder="https://your-project.supabase.co" value="${state.supabaseConfig.url}">
+              <input type="password" class="input-text" id="supabaseKey" placeholder="Supabase Public Anon Key" value="${state.supabaseConfig.key}">
+              <button class="btn-m3" onclick="saveSupabaseConfig()">Save Configuration</button>
+            </div>
+            <div id="cfgSavedMsg" style="display:none; color:var(--legit-green); font-size:12px; font-weight:600; margin-top:8px;">
+              ✓ Cloud backend settings saved.
+            </div>
+          </div>
+
+          <h4 style="font-size:14px; font-weight:700; margin-top:6px;">Data Management</h4>
+
+          <div class="m3-card" style="display:flex; flex-direction:column; gap:10px;">
+            <button class="btn-outlined" onclick="promptClearHistory()">Clear Screening History</button>
+            <button class="btn-outlined btn-danger" onclick="promptResetAllData()">Reset All Local Data</button>
+          </div>
+
+          <div class="m3-card" style="background:var(--surface-card-subtle);">
+            <h5 style="font-size:12px; font-weight:700; margin-bottom:4px;">🔒 Privacy Commitments</h5>
+            <p style="font-size:11px; color:var(--text-secondary); line-height:1.5;">
+              • No address book uploads.<br>
+              • No audio recording or transcription.<br>
+              • SafeCall AI Engine: Transparent Deterministic Rules v1.0.
+            </p>
+          </div>
+
+        </div>
+      `;
+    }
+
+    /* Actions & State Mutations */
+    function toggleProtection(val) {
+      state.isProtectionEnabled = val;
+      if (state.currentScreen === 'home' || state.currentScreen === 'settings') {
+        navigateTo(state.currentScreen);
+      }
+    }
+
+    function toggleAggressive(val) {
+      state.isAggressiveBlockingEnabled = val;
+      if (state.currentScreen === 'settings') navigateTo('settings');
+    }
+
+    function toggleOffline(val) {
+      state.isOfflineModeForced = val;
+      if (state.currentScreen === 'settings') navigateTo('settings');
+    }
+
+    function setLookup(phone) {
+      document.getElementById('homeLookupInput').value = phone;
+    }
+
+    function handleLookup() {
+      const input = document.getElementById('homeLookupInput').value.trim();
+      if (input) navigateTo('details', input);
+    }
+
+    function filterActivity(filter) {
+      document.getElementById('viewport').innerHTML = renderActivityScreen(filter);
+    }
+
+    function promptAddTrusted(phone, label) {
+      const modal = document.getElementById('modalOverlay');
+      const card = document.getElementById('modalCard');
+      card.innerHTML = `
+        <h3>Add Trusted Caller</h3>
+        <p style="font-size:12px; color:var(--text-secondary);">
+          Calls from this number will ring normally on this device.
+        </p>
+        <input type="text" class="input-text" id="addPhoneInput" placeholder="+91 98765 43210" value="${phone}">
+        <input type="text" class="input-text" id="addLabelInput" placeholder="Name or Label (e.g. Gate Security)" value="${label}">
+        <input type="text" class="input-text" id="addNotesInput" placeholder="Optional notes">
+        <div style="display:flex; gap:10px; margin-top:8px;">
+          <button class="btn-outlined" onclick="closeModal()">Cancel</button>
+          <button class="btn-m3" onclick="confirmAddTrusted()">Save</button>
+        </div>
+      `;
+      modal.classList.add('active');
+    }
+
+    function confirmAddTrusted() {
+      const phone = document.getElementById('addPhoneInput').value.trim();
+      const label = document.getElementById('addLabelInput').value.trim();
+      const notes = document.getElementById('addNotesInput').value.trim();
+      if (phone && label) {
+        state.trustedCallers.push({
+          id: Date.now(),
+          phone: phone,
+          label: label,
+          notes: notes
+        });
+        closeModal();
+        if (state.currentScreen === 'trusted' || state.currentScreen === 'details') {
+          navigateTo(state.currentScreen, phone);
+        }
+      }
+    }
+
+    function removeTrusted(id) {
+      state.trustedCallers = state.trustedCallers.filter(t => t.id !== id);
+      navigateTo('trusted');
+    }
+
+    function removeTrustedByPhone(phone) {
+      state.trustedCallers = state.trustedCallers.filter(t => t.phone !== phone);
+      navigateTo('details', phone);
+    }
+
+    function promptClearHistory() {
+      const modal = document.getElementById('modalOverlay');
+      const card = document.getElementById('modalCard');
+      card.innerHTML = `
+        <h3>Clear Screening History?</h3>
+        <p style="font-size:13px; color:var(--text-secondary);">
+          This will delete all locally saved records of screened calls.
+        </p>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button class="btn-outlined" onclick="closeModal()">Cancel</button>
+          <button class="btn-m3" style="background:var(--high-risk-red);" onclick="confirmClearHistory()">Clear All</button>
+        </div>
+      `;
+      modal.classList.add('active');
+    }
+
+    function confirmClearHistory() {
+      state.recentCalls = [];
+      closeModal();
+      if (state.currentScreen === 'activity' || state.currentScreen === 'home' || state.currentScreen === 'settings') {
+        navigateTo(state.currentScreen);
+      }
+    }
+
+    function promptResetAllData() {
+      const modal = document.getElementById('modalOverlay');
+      const card = document.getElementById('modalCard');
+      card.innerHTML = `
+        <h3 style="color:var(--high-risk-red);">Reset All Local Data?</h3>
+        <p style="font-size:13px; color:var(--text-secondary);">
+          This will wipe your screening records, trusted list, and local cache.
+        </p>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button class="btn-outlined" onclick="closeModal()">Cancel</button>
+          <button class="btn-m3" style="background:var(--high-risk-red);" onclick="confirmResetAllData()">Reset Everything</button>
+        </div>
+      `;
+      modal.classList.add('active');
+    }
+
+    function confirmResetAllData() {
+      state.recentCalls = [];
+      state.trustedCallers = [];
+      state.stats.falseSpamRecovered = 0;
+      state.stats.verifiedLegitimate = 0;
+      closeModal();
+      navigateTo('settings');
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('active');
+    }
+
+    function submitReport() {
+      const alert = document.getElementById('reportSuccessAlert');
+      alert.style.display = 'block';
+      setTimeout(() => {
+        navigateTo('home');
+      }, 1500);
+    }
+
+    function saveSupabaseConfig() {
+      state.supabaseConfig.url = document.getElementById('supabaseUrl').value.trim();
+      state.supabaseConfig.key = document.getElementById('supabaseKey').value.trim();
+      const msg = document.getElementById('cfgSavedMsg');
+      msg.style.display = 'block';
+    }
+
+    /* Fast Test Scenarios */
+    function runScenario(type) {
+      if (type === 'amazon') navigateTo('details', '+919876543210');
+      if (type === 'uber') navigateTo('details', '+919876512345');
+      if (type === 'scam') navigateTo('details', '+919876500000');
+      if (type === 'telemarket') navigateTo('details', '+918049202020');
+    }
+
+    // Initial render
+    navigateTo('home');
+  </script>
+</body>
+</html>

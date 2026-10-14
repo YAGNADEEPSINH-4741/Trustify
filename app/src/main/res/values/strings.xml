@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">SafeCall AI</string>
+    <string name="call_screening_service_description">Screens incoming calls to detect legitimate callers incorrectly flagged as spam and alerts you with verified evidence.</string>
+    <string name="notification_channel_name">Caller Identification Alerts</string>
+    <string name="notification_channel_description">Notifications when SafeCall AI screens an incoming call or recovers a false spam number.</string>
+</resources>
