@@ -23,5 +23,17 @@ enum class VerificationStatus {
     EXPIRED,
 
     /** Conflicting evidence detected (e.g. claims to be bank, but carrier reports spoofing) */
-    CONFLICTING_SIGNALS
+    CONFLICTING_SIGNALS;
+
+    val displayName: String
+        get() = when (this) {
+            VERIFIED_BUSINESS -> "Verified Business"
+            ACTIVE_BOOKING_ASSOCIATED -> "Active Booking Associated"
+            USER_TRUSTED -> "User Trusted Contact"
+            COMMUNITY_REPUTATION -> "Community Reputation"
+            UNVERIFIED -> "Unverified"
+            EXPIRED -> "Expired Verification"
+            CONFLICTING_SIGNALS -> "Conflicting Signals"
+        }
 }
+

@@ -1,6 +1,7 @@
 package com.safecallai.app.ui.screens
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -24,6 +25,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeliveryDining
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Warning
@@ -33,7 +36,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -47,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,12 +62,13 @@ import com.safecallai.app.domain.engine.PhoneNumberNormalizer
 import com.safecallai.app.domain.models.CallerClassification
 import com.safecallai.app.domain.models.ScreenedCallRecord
 import com.safecallai.app.domain.models.VerificationStatus
+import com.safecallai.app.service.ScreeningNotificationHelper
 import com.safecallai.app.ui.components.ClassificationBadge
 import com.safecallai.app.ui.theme.BrandBlue
+import com.safecallai.app.ui.theme.HighRiskRed
 import com.safecallai.app.ui.theme.LegitGreen
 import com.safecallai.app.ui.theme.LikelyLegitTeal
 import com.safecallai.app.ui.theme.SafeCallAITheme
-import com.safecallai.app.ui.theme.Slate800
 import com.safecallai.app.ui.theme.SpamAmber
 import com.safecallai.app.ui.viewmodels.DashboardUiState
 import com.safecallai.app.ui.viewmodels.SafeCallViewModel
@@ -76,6 +83,7 @@ fun DashboardScreen(
     onNavigateToActivity: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     val roleLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -87,9 +95,19 @@ fun DashboardScreen(
         uiState = uiState,
         onRequestRole = {
             val intent = viewModel.getRoleManager().createRequestRoleIntent()
-            if (intent != null) roleLauncher.launch(intent)
+            if (intent != null) {
+                roleLauncher.launch(intent)
+            } else {
+                Toast.makeText(context, "Call Screening Service is bound automatically on this Android version", Toast.LENGTH_LONG).show()
+            }
         },
+        onToggleProtection = { viewModel.toggleProtection(it) },
         onToggleExpectingDelivery = { viewModel.toggleUserExpectingDelivery(it) },
+        onTestNotification = {
+            ScreeningNotificationHelper.simulateScreeningCall(context, "+919876543210") {
+                Toast.makeText(context, "Heads-up notification triggered!", Toast.LENGTH_SHORT).show()
+            }
+        },
         onNavigateToCallerDetails = onNavigateToCallerDetails,
         onNavigateToActivity = onNavigateToActivity
     )
@@ -99,7 +117,9 @@ fun DashboardScreen(
 fun DashboardContent(
     uiState: DashboardUiState,
     onRequestRole: () -> Unit,
+    onToggleProtection: (Boolean) -> Unit,
     onToggleExpectingDelivery: (Boolean) -> Unit,
+    onTestNotification: () -> Unit = {},
     onNavigateToCallerDetails: (String) -> Unit,
     onNavigateToActivity: () -> Unit
 ) {
@@ -112,9 +132,9 @@ fun DashboardContent(
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // App Header
         item {
             Spacer(modifier = Modifier.height(16.dp))
-            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -124,86 +144,117 @@ fun DashboardContent(
                     Text(
                         text = "SafeCall AI",
                         style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
-                        text = "Real-Time False Spam Shield",
+                        text = "Verifiable Legitimate Caller Detection",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                // Status pill
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(if (uiState.isRoleHeld) LegitGreen.copy(alpha = 0.15f) else SpamAmber.copy(alpha = 0.15f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                // Protection Status Badge
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = if (uiState.isProtectionEnabled) LegitGreen.copy(alpha = 0.15f) else HighRiskRed.copy(alpha = 0.15f),
+                    modifier = Modifier.padding(vertical = 4.dp)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
                                 .clip(CircleShape)
-                                .background(if (uiState.isRoleHeld) LegitGreen else SpamAmber)
+                                .background(if (uiState.isProtectionEnabled) LegitGreen else HighRiskRed)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = if (uiState.isRoleHeld) "PROTECTED" else "SETUP NEEDED",
+                            text = if (uiState.isProtectionEnabled) "SHIELD ACTIVE" else "PAUSED",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (uiState.isRoleHeld) LegitGreen else SpamAmber
+                            color = if (uiState.isProtectionEnabled) LegitGreen else HighRiskRed
                         )
                     }
                 }
             }
         }
 
-        // Setup Callout if Role is missing
-        if (!uiState.isRoleHeld) {
-            item {
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = SpamAmber.copy(alpha = 0.12f)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Warning,
-                                contentDescription = null,
-                                tint = SpamAmber,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Action Required: Set as Call Screening App",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "To inspect incoming calls and prevent wrongful delivery blocking, select SafeCall AI as the default call screening app in Android.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Button(
-                            onClick = onRequestRole,
-                            colors = ButtonDefaults.buttonColors(containerColor = SpamAmber),
-                            shape = RoundedCornerShape(10.dp)
+        // Master Protection Status Card
+        item {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
                         ) {
-                            Text("Activate Call Screening", color = Color.Black, fontWeight = FontWeight.SemiBold)
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(CircleShape)
+                                    .background(BrandBlue.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Shield,
+                                    contentDescription = null,
+                                    tint = BrandBlue,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Call Screening Protection",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = if (uiState.isProtectionEnabled)
+                                        "Screening incoming calls to prevent false spam blocking"
+                                    else
+                                        "Protection paused — calls ring through unfiltered",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
+
+                        Switch(
+                            checked = uiState.isProtectionEnabled,
+                            onCheckedChange = onToggleProtection,
+                            colors = SwitchDefaults.colors(checkedThumbColor = BrandBlue)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Test Call Notification Button
+                    OutlinedButton(
+                        onClick = onTestNotification,
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Test Incoming Call Notification")
                     }
                 }
             }
         }
 
-        // Stats Cards Grid
+        // Honest Stats Summary Grid (Actual Counts from SQLite)
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -286,7 +337,7 @@ fun DashboardContent(
             }
         }
 
-        // Live Diagnostic / Number Lookup Bar
+        // Instant Number Lookup Bar
         item {
             Card(
                 shape = RoundedCornerShape(16.dp),
@@ -295,7 +346,7 @@ fun DashboardContent(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Test / Lookup Any Number",
+                        text = "Instant Number Lookup",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -332,10 +383,10 @@ fun DashboardContent(
                         }
                     }
 
-                    // Sample quick test chips
+                    // Sample quick test scenarios
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Quick Demo Scenarios:",
+                        text = "Quick Test Scenarios:",
                         fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -343,13 +394,13 @@ fun DashboardContent(
                         modifier = Modifier.padding(top = 4.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        QuickDemoChip(label = "Amazon Partner") {
+                        QuickDemoChip(label = "Amazon (+919876543210)") {
                             onNavigateToCallerDetails("+919876543210")
                         }
-                        QuickDemoChip(label = "HDFC Support") {
+                        QuickDemoChip(label = "HDFC Bank (+9118002026161)") {
                             onNavigateToCallerDetails("+9118002026161")
                         }
-                        QuickDemoChip(label = "Uber Driver") {
+                        QuickDemoChip(label = "Uber (+919988776655)") {
                             onNavigateToCallerDetails("+919988776655")
                         }
                     }
@@ -365,13 +416,13 @@ fun DashboardContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Recent Activity",
+                    text = "Recent Screening Activity",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 if (uiState.recentCalls.isNotEmpty()) {
                     Text(
-                        text = "See All",
+                        text = "See All (${uiState.recentCalls.size})",
                         style = MaterialTheme.typography.bodyMedium,
                         color = BrandBlue,
                         fontWeight = FontWeight.SemiBold,
@@ -381,7 +432,7 @@ fun DashboardContent(
             }
         }
 
-        // Recent Activity List / Empty State
+        // Recent Activity List or Empty State
         if (uiState.recentCalls.isEmpty()) {
             item {
                 Card(
@@ -408,7 +459,7 @@ fun DashboardContent(
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = "When incoming calls arrive or you test numbers above, SafeCall AI's classification ledger will appear here.",
+                            text = "When incoming calls arrive or you test numbers above, SafeCall AI's classification records will appear here.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 4.dp),
@@ -466,18 +517,17 @@ private fun StatCard(
 
 @Composable
 private fun QuickDemoChip(label: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(Slate800)
-            .clickable { onClick() }
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.clickable { onClick() }
     ) {
         Text(
             text = label,
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
         )
     }
 }
@@ -602,6 +652,7 @@ fun DashboardScreenDarkPreview() {
                 )
             ),
             onRequestRole = {},
+            onToggleProtection = {},
             onToggleExpectingDelivery = {},
             onNavigateToCallerDetails = {},
             onNavigateToActivity = {}
@@ -609,7 +660,7 @@ fun DashboardScreenDarkPreview() {
     }
 }
 
-@Preview(name = "Dashboard - Light Theme", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true, showSystemUi = true, device = Devices.PIXEL_7)
+@Preview(name = "Dashboard - Light Theme", showBackground = true, showSystemUi = true, device = Devices.PIXEL_7)
 @Composable
 fun DashboardScreenLightPreview() {
     SafeCallAITheme(darkTheme = false) {
@@ -623,6 +674,7 @@ fun DashboardScreenLightPreview() {
                 recentCalls = emptyList()
             ),
             onRequestRole = {},
+            onToggleProtection = {},
             onToggleExpectingDelivery = {},
             onNavigateToCallerDetails = {},
             onNavigateToActivity = {}

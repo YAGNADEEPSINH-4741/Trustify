@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 data class DashboardUiState(
     val isRoleHeld: Boolean = false,
+    val themeMode: com.safecallai.app.data.local.PreferencesManager.ThemeMode = com.safecallai.app.data.local.PreferencesManager.ThemeMode.SYSTEM_DEFAULT,
     val totalScreenedCount: Int = 0,
     val falseSpamRecoveredCount: Int = 0,
     val verifiedCount: Int = 0,
@@ -39,7 +40,9 @@ class SafeCallViewModel(application: Application) : AndroidViewModel(application
     private val repository = app.repository
     private val roleManager = CallScreeningRoleManager(application)
 
-    private val _uiState = MutableStateFlow(DashboardUiState())
+    private val _uiState = MutableStateFlow(
+        DashboardUiState(themeMode = repository.preferences.themeMode)
+    )
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
     init {
@@ -55,6 +58,7 @@ class SafeCallViewModel(application: Application) : AndroidViewModel(application
 
             _uiState.value = _uiState.value.copy(
                 isRoleHeld = roleHeld,
+                themeMode = repository.preferences.themeMode,
                 totalScreenedCount = stats.first,
                 falseSpamRecoveredCount = stats.second,
                 verifiedCount = stats.third,
@@ -66,6 +70,11 @@ class SafeCallViewModel(application: Application) : AndroidViewModel(application
                 trustedCallers = trusted
             )
         }
+    }
+
+    fun setThemeMode(mode: com.safecallai.app.data.local.PreferencesManager.ThemeMode) {
+        repository.preferences.themeMode = mode
+        _uiState.value = _uiState.value.copy(themeMode = mode)
     }
 
     fun evaluateNumber(rawNumber: String) {

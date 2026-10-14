@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.safecallai.app.VerificationProviderTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-13T11:21:53.149Z" hostname="LAPTOP-L6I9BESR" time="0.034">
+<testsuite name="com.safecallai.app.VerificationProviderTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-14T06:07:00.282Z" hostname="LAPTOP-L6I9BESR" time="0.035">
   <properties/>
-  <testcase name="testMockDeliveryProvider_knownAmazonPartner" classname="com.safecallai.app.VerificationProviderTest" time="0.03"/>
+  <testcase name="testMockDeliveryProvider_knownAmazonPartner" classname="com.safecallai.app.VerificationProviderTest" time="0.031"/>
   <testcase name="testVerificationRegistry_dispatchesActiveRide" classname="com.safecallai.app.VerificationProviderTest" time="0.003"/>
   <testcase name="testMockDeliveryProvider_unknownNumber" classname="com.safecallai.app.VerificationProviderTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>

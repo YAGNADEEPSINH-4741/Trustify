@@ -22,6 +22,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,7 +58,8 @@ class MainActivity : ComponentActivity() {
         val initialPhoneNumber = intent?.getStringExtra("EXTRA_PHONE_NUMBER")
 
         setContent {
-            SafeCallAITheme {
+            val uiState by viewModel.uiState.collectAsState()
+            SafeCallAITheme(themeMode = uiState.themeMode) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -126,7 +128,8 @@ fun SafeCallApp(
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
-                                navController.navigate(item.screen.route) {
+                                val targetRoute = if (item.screen == Screen.Report) Screen.Report.createRoute() else item.screen.route
+                                navController.navigate(targetRoute) {
                                     popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true
                                     }
@@ -197,8 +200,19 @@ fun SafeCallApp(
                 )
             }
 
-            composable(Screen.Report.route) {
+            composable(
+                route = Screen.Report.route,
+                arguments = listOf(
+                    navArgument("phoneNumber") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
+                )
+            ) { backStackEntry ->
+                val phone = backStackEntry.arguments?.getString("phoneNumber")
                 ReportNumberScreen(
+                    initialPhoneNumber = phone,
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() }
                 )
@@ -220,7 +234,7 @@ fun SafeCallApp(
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() },
                     onNavigateToReport = { reportPhone ->
-                        navController.navigate(Screen.Report.route)
+                        navController.navigate(Screen.Report.createRoute(reportPhone))
                     }
                 )
             }

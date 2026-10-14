@@ -88,7 +88,7 @@ fun ReportNumberScreenContent(
     onSubmitReport: (phone: String, category: ReportCategory, description: String) -> Unit = { _, _, _ -> },
     onBack: () -> Unit = {}
 ) {
-    var phoneNumber by remember { mutableStateOf(initialPhoneNumber ?: "") }
+    var phoneNumber by remember { mutableStateOf(if (initialPhoneNumber == "{phoneNumber}" || initialPhoneNumber == null) "" else initialPhoneNumber) }
     var selectedCategory by remember { mutableStateOf(ReportCategory.INCORRECT_SPAM_CLASSIFICATION) }
     var description by remember { mutableStateOf("") }
     var isConfirmed by remember { mutableStateOf(false) }

@@ -1,6 +1,10 @@
 package com.safecallai.app.ui.screens
 
+import android.app.Activity
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,23 +20,31 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrightnessAuto
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -49,9 +61,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.safecallai.app.data.local.PreferencesManager
+import com.safecallai.app.service.ScreeningNotificationHelper
 import com.safecallai.app.ui.theme.BrandBlue
 import com.safecallai.app.ui.theme.HighRiskRed
 import com.safecallai.app.ui.theme.LegitGreen
@@ -65,14 +81,31 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     SettingsScreenContent(
+        themeMode = uiState.themeMode,
+        isRoleHeld = uiState.isRoleHeld,
         isProtectionEnabled = uiState.isProtectionEnabled,
         isAggressiveBlockingEnabled = uiState.isAggressiveBlockingEnabled,
         isOfflineModeForced = uiState.isOfflineModeForced,
         initialSupabaseUrl = viewModel.getRepository().preferences.supabaseUrl,
         initialSupabaseKey = viewModel.getRepository().preferences.supabaseAnonKey,
         connectedProviders = viewModel.getRepository().getConnectedProvidersInfo(),
+        onSetThemeMode = { mode -> viewModel.setThemeMode(mode) },
+        onRequestRole = {
+            val intent = viewModel.getRoleManager().createRequestRoleIntent()
+            if (intent != null && context is Activity) {
+                context.startActivity(intent)
+            } else {
+                Toast.makeText(context, "Call Screening Service is bound automatically on this Android version", Toast.LENGTH_LONG).show()
+            }
+        },
+        onTestNotification = {
+            ScreeningNotificationHelper.simulateScreeningCall(context, "+919876543210") {
+                Toast.makeText(context, "Heads-up notification triggered!", Toast.LENGTH_SHORT).show()
+            }
+        },
         onToggleProtection = { viewModel.toggleProtection(it) },
         onToggleAggressiveBlocking = { viewModel.toggleAggressiveBlocking(it) },
         onToggleOfflineMode = { viewModel.toggleOfflineMode(it) },
@@ -92,12 +125,17 @@ fun SettingsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreenContent(
+    themeMode: PreferencesManager.ThemeMode,
+    isRoleHeld: Boolean,
     isProtectionEnabled: Boolean,
     isAggressiveBlockingEnabled: Boolean,
     isOfflineModeForced: Boolean,
     initialSupabaseUrl: String,
     initialSupabaseKey: String,
     connectedProviders: List<String>,
+    onSetThemeMode: (PreferencesManager.ThemeMode) -> Unit,
+    onRequestRole: () -> Unit = {},
+    onTestNotification: () -> Unit = {},
     onToggleProtection: (Boolean) -> Unit,
     onToggleAggressiveBlocking: (Boolean) -> Unit,
     onToggleOfflineMode: (Boolean) -> Unit,
@@ -156,9 +194,134 @@ fun SettingsScreenContent(
         ) {
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Protection Controls Section
+            // 1. APPEARANCE & THEME SECTION (MANDATORY PHASE 3)
             Text(
-                text = "Call Screening Preferences",
+                text = "Appearance & Theme",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Theme Preference",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "Choose how SafeCall AI appears across all screens and system bars",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // 3-Option Segmented Control: System Default, Light, Dark
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        ThemeOptionChip(
+                            label = "System",
+                            icon = Icons.Default.BrightnessAuto,
+                            isSelected = themeMode == PreferencesManager.ThemeMode.SYSTEM_DEFAULT,
+                            modifier = Modifier.weight(1f),
+                            onClick = { onSetThemeMode(PreferencesManager.ThemeMode.SYSTEM_DEFAULT) }
+                        )
+
+                        ThemeOptionChip(
+                            label = "Light",
+                            icon = Icons.Default.LightMode,
+                            isSelected = themeMode == PreferencesManager.ThemeMode.LIGHT,
+                            modifier = Modifier.weight(1f),
+                            onClick = { onSetThemeMode(PreferencesManager.ThemeMode.LIGHT) }
+                        )
+
+                        ThemeOptionChip(
+                            label = "Dark",
+                            icon = Icons.Default.DarkMode,
+                            isSelected = themeMode == PreferencesManager.ThemeMode.DARK,
+                            modifier = Modifier.weight(1f),
+                            onClick = { onSetThemeMode(PreferencesManager.ThemeMode.DARK) }
+                        )
+                    }
+                }
+            }
+
+            // 2. INCOMING CALL SCREENING & NOTIFICATION EXPERIENCE (PHASE 4)
+            Text(
+                text = "Call Screening & Notifications",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (isRoleHeld) Icons.Default.CheckCircle else Icons.Default.Shield,
+                                contentDescription = null,
+                                tint = if (isRoleHeld) LegitGreen else BrandBlue,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (isRoleHeld) "Call Screening Active" else "Screening Service Registered",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        if (!isRoleHeld) {
+                            TextButton(onClick = onRequestRole) {
+                                Text("Set Default", fontSize = 12.sp, color = BrandBlue)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "SafeCallScreeningService inspects incoming calls and displays heads-up verification alerts when numbers ring.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Test Live Notification Button
+                    Button(
+                        onClick = onTestNotification,
+                        colors = ButtonDefaults.buttonColors(containerColor = BrandBlue),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Test Incoming Call Notification")
+                    }
+                }
+            }
+
+            // 3. CALL SCREENING PREFERENCES
+            Text(
+                text = "Screening Preferences",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -250,9 +413,9 @@ fun SettingsScreenContent(
                 }
             }
 
-            // Backend & Cloud Integration Card
+            // 4. CLOUD VERIFICATION BACKEND (SUPABASE)
             Text(
-                text = "Cloud Verification Backend (Supabase)",
+                text = "Cloud Verification Backend (Optional)",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -279,7 +442,7 @@ fun SettingsScreenContent(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Connect your Supabase project to synchronize community verified business registries and receive crowd false-spam corrections.",
+                        text = "Connect a Supabase project to synchronize community verified business registries. If left empty, SafeCall operates completely offline.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -340,7 +503,7 @@ fun SettingsScreenContent(
                 }
             }
 
-            // Data & History Management
+            // 5. DATA MANAGEMENT
             Text(
                 text = "Data Management",
                 style = MaterialTheme.typography.titleMedium,
@@ -376,7 +539,7 @@ fun SettingsScreenContent(
                 }
             }
 
-            // Privacy Commitments Card
+            // 6. PRIVACY COMMITMENTS CARD
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -401,7 +564,7 @@ fun SettingsScreenContent(
                 }
             }
 
-            // About & Connected Providers Info
+            // 7. ACTIVE VERIFICATION PROVIDERS INFO
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -435,6 +598,43 @@ fun SettingsScreenContent(
     }
 }
 
+@Composable
+private fun ThemeOptionChip(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (isSelected) BrandBlue else Color.Transparent)
+            .clickable(onClick = onClick)
+            .padding(vertical = 10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
 @androidx.compose.ui.tooling.preview.Preview(
     name = "Settings - Dark",
     showBackground = true,
@@ -446,12 +646,17 @@ fun SettingsScreenContent(
 fun PreviewSettingsDark() {
     com.safecallai.app.ui.theme.SafeCallAITheme(darkTheme = true) {
         SettingsScreenContent(
+            themeMode = PreferencesManager.ThemeMode.DARK,
+            isRoleHeld = true,
             isProtectionEnabled = true,
             isAggressiveBlockingEnabled = false,
             isOfflineModeForced = false,
             initialSupabaseUrl = "https://example.supabase.co",
             initialSupabaseKey = "anon-key-12345",
             connectedProviders = listOf("Mock Logistics Provider (Amazon, Flipkart)", "Mock Ride-Hailing Provider (Uber, Ola)", "Local SQLite Deterministic Cache"),
+            onSetThemeMode = {},
+            onRequestRole = {},
+            onTestNotification = {},
             onToggleProtection = {},
             onToggleAggressiveBlocking = {},
             onToggleOfflineMode = {},
@@ -473,12 +678,17 @@ fun PreviewSettingsDark() {
 fun PreviewSettingsLight() {
     com.safecallai.app.ui.theme.SafeCallAITheme(darkTheme = false) {
         SettingsScreenContent(
+            themeMode = PreferencesManager.ThemeMode.LIGHT,
+            isRoleHeld = false,
             isProtectionEnabled = true,
             isAggressiveBlockingEnabled = true,
             isOfflineModeForced = true,
             initialSupabaseUrl = "",
             initialSupabaseKey = "",
             connectedProviders = listOf("Local SQLite Deterministic Cache (Standalone)"),
+            onSetThemeMode = {},
+            onRequestRole = {},
+            onTestNotification = {},
             onToggleProtection = {},
             onToggleAggressiveBlocking = {},
             onToggleOfflineMode = {},

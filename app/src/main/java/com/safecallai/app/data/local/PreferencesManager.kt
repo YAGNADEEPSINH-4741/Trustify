@@ -16,7 +16,25 @@ class PreferencesManager(context: Context) {
         private const val KEY_SUPABASE_URL = "key_supabase_url"
         private const val KEY_SUPABASE_ANON_KEY = "key_supabase_anon_key"
         private const val KEY_OFFLINE_MODE = "key_offline_mode"
+        private const val KEY_THEME_MODE = "key_theme_mode"
     }
+
+    enum class ThemeMode {
+        LIGHT,
+        DARK,
+        SYSTEM_DEFAULT
+    }
+
+    var themeMode: ThemeMode
+        get() {
+            val name = prefs.getString(KEY_THEME_MODE, ThemeMode.SYSTEM_DEFAULT.name)
+            return try {
+                ThemeMode.valueOf(name ?: ThemeMode.SYSTEM_DEFAULT.name)
+            } catch (_: Exception) {
+                ThemeMode.SYSTEM_DEFAULT
+            }
+        }
+        set(value) = prefs.edit().putString(KEY_THEME_MODE, value.name).apply()
 
     var isProtectionEnabled: Boolean
         get() = prefs.getBoolean(KEY_PROTECTION_ENABLED, true)

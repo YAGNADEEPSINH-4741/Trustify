@@ -42,6 +42,15 @@
             </intent-filter>
         </service>
 
+        <!-- Receiver for testing incoming call screening via ADB or internal triggers -->
+        <receiver
+            android:name=".service.CallScreeningBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.safecallai.app.SIMULATE_CALL" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

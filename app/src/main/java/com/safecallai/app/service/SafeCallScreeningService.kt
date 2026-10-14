@@ -40,8 +40,22 @@ class SafeCallScreeningService : CallScreeningService() {
 
         serviceScope.launch {
             try {
-                // Perform full multi-signal evidence classification
-                val result = repository.screenAndClassify(rawNumber, recordInHistory = true)
+                // Perform multi-signal evidence classification with a strict 4-second timeout guarantee
+                val result = kotlinx.coroutines.withTimeoutOrNull(4000L) {
+                    repository.screenAndClassify(rawNumber, recordInHistory = true)
+                }
+
+                if (result == null) {
+                    // Timeout fallback: pass call through safely
+                    val safeTimeoutResponse = CallResponse.Builder()
+                        .setDisallowCall(false)
+                        .setRejectCall(false)
+                        .setSkipCallLog(false)
+                        .setSkipNotification(false)
+                        .build()
+                    respondToCall(callDetails, safeTimeoutResponse)
+                    return@launch
+                }
 
                 val responseBuilder = CallResponse.Builder()
 
@@ -71,6 +85,8 @@ class SafeCallScreeningService : CallScreeningService() {
                 val safeFallback = CallResponse.Builder()
                     .setDisallowCall(false)
                     .setRejectCall(false)
+                    .setSkipCallLog(false)
+                    .setSkipNotification(false)
                     .build()
                 respondToCall(callDetails, safeFallback)
             }
