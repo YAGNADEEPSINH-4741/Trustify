@@ -2,11 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permissions for Call Screening and Network Operations -->
+    <!-- Permissions for Call Screening, InCallService, and Network Operations -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <application
         android:name=".SafeCallApplication"
@@ -30,9 +33,42 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Enables system to recognize SafeCall AI as eligible phone dialer -->
+            <intent-filter>
+                <action android:name="android.intent.action.DIAL" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.DIAL" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="tel" />
+            </intent-filter>
         </activity>
 
-        <!-- Android CallScreeningService declaration -->
+        <!-- Fullscreen Custom Incoming and Active Calling Interface -->
+        <activity
+            android:name=".ui.call.IncomingCallActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.SafeCallAI"
+            android:windowSoftInputMode="adjustNothing" />
+
+        <!-- Android InCallService declaration for Default Dialer role -->
+        <service
+            android:name=".service.SafeCallInCallService"
+            android:permission="android.permission.BIND_INCALL_SERVICE"
+            android:exported="true">
+            <meta-data
+                android:name="android.telecom.IN_CALL_SERVICE_UI"
+                android:value="true" />
+            <intent-filter>
+                <action android:name="android.telecom.InCallService" />
+            </intent-filter>
+        </service>
+
+        <!-- Android CallScreeningService declaration for Call Screening role -->
         <service
             android:name=".service.SafeCallScreeningService"
             android:permission="android.permission.BIND_SCREEN_CALL_SERVICE"
@@ -42,12 +78,22 @@
             </intent-filter>
         </service>
 
-        <!-- Receiver for testing incoming call screening via ADB or internal triggers -->
+        <!-- Receivers for testing incoming call screening & calling screen via ADB -->
         <receiver
             android:name=".service.CallScreeningBroadcastReceiver"
+            android:permission="android.permission.DUMP"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.safecallai.app.SIMULATE_CALL" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".service.IncomingCallTestReceiver"
+            android:permission="android.permission.DUMP"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.safecallai.app.SIMULATE_INCOMING_CALL" />
             </intent-filter>
         </receiver>
 

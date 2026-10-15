@@ -1,7 +1,12 @@
 package com.safecallai.app.ui.screens
 
 import android.app.Activity
+import android.content.Intent
+import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,8 +35,10 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -82,10 +89,146 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    var showRestrictedSettingsDialog by remember { mutableStateOf(false) }
+
+    val defaultDialerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        viewModel.refreshState()
+        // If system denied or cancelled setting default phone app (e.g. Android 13+ sideload restriction), show step-by-step guidance
+        if (!viewModel.getDefaultDialerManager().isDefaultDialer()) {
+            showRestrictedSettingsDialog = true
+        }
+    }
+
+    val roleLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        viewModel.refreshState()
+    }
+
+    if (showRestrictedSettingsDialog) {
+        AlertDialog(
+            onDismissRequest = { showRestrictedSettingsDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Security,
+                    contentDescription = null,
+                    tint = BrandBlue,
+                    modifier = Modifier.size(32.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "Allow Default Phone App Access",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        text = "Because SafeCall AI was installed via WhatsApp or sideloading, Android restricts setting default apps until you allow Restricted Settings in App Info.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "Quick 3-Step Setup:",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = BrandBlue
+                            )
+                            Text(
+                                text = "1. Tap \"1. Open App Info\" below.",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "2. Tap the 3 dots (⋮) in the top-right corner of the App Info page.",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "3. Tap \"Allow restricted settings\" and unlock with fingerprint or PIN.",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "4. Return here and tap \"Set Default\" (or \"Open Default Apps\").",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            try {
+                                context.startActivity(viewModel.getDefaultDialerManager().createAppInfoIntent())
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Open Settings > Apps > SafeCall AI", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = BrandBlue),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("1. Open App Info (3 Dots ⋮)", fontWeight = FontWeight.SemiBold)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            try {
+                                context.startActivity(viewModel.getDefaultDialerManager().createDefaultAppsIntent())
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Open Settings > Apps > Default apps", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("2. Open Default Apps", fontWeight = FontWeight.SemiBold)
+                    }
+
+                    TextButton(
+                        onClick = {
+                            showRestrictedSettingsDialog = false
+                            viewModel.refreshState()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Close / Done")
+                    }
+                }
+            },
+            dismissButton = null
+        )
+    }
 
     SettingsScreenContent(
         themeMode = uiState.themeMode,
         isRoleHeld = uiState.isRoleHeld,
+        isDefaultDialer = uiState.isDefaultDialer,
         isProtectionEnabled = uiState.isProtectionEnabled,
         isAggressiveBlockingEnabled = uiState.isAggressiveBlockingEnabled,
         isOfflineModeForced = uiState.isOfflineModeForced,
@@ -95,11 +238,45 @@ fun SettingsScreen(
         onSetThemeMode = { mode -> viewModel.setThemeMode(mode) },
         onRequestRole = {
             val intent = viewModel.getRoleManager().createRequestRoleIntent()
-            if (intent != null && context is Activity) {
-                context.startActivity(intent)
+            if (intent != null) {
+                try {
+                    roleLauncher.launch(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Call Screening Service is bound automatically on this Android version", Toast.LENGTH_LONG).show()
+                }
             } else {
                 Toast.makeText(context, "Call Screening Service is bound automatically on this Android version", Toast.LENGTH_LONG).show()
             }
+        },
+        onRequestDefaultDialer = {
+            if (viewModel.getDefaultDialerManager().isDefaultDialer()) {
+                Toast.makeText(context, "SafeCall AI is already your Default Phone App", Toast.LENGTH_SHORT).show()
+            } else {
+                val intent = viewModel.getDefaultDialerManager().createRequestDefaultDialerIntent()
+                if (intent != null) {
+                    try {
+                        defaultDialerLauncher.launch(intent)
+                    } catch (e: Exception) {
+                        try {
+                            defaultDialerLauncher.launch(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+                        } catch (e2: Exception) {
+                            Toast.makeText(context, "Please set SafeCall AI in Settings > Apps > Default apps", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                } else {
+                    try {
+                        defaultDialerLauncher.launch(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Please set SafeCall AI in Settings > Apps > Default apps", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        },
+        onShowRestrictedSettingsGuide = {
+            showRestrictedSettingsDialog = true
+        },
+        onSimulateCustomCall = { phone, name ->
+            viewModel.simulateCustomCall(context, phone, name)
         },
         onTestNotification = {
             ScreeningNotificationHelper.simulateScreeningCall(context, "+919876543210") {
@@ -127,6 +304,7 @@ fun SettingsScreen(
 fun SettingsScreenContent(
     themeMode: PreferencesManager.ThemeMode,
     isRoleHeld: Boolean,
+    isDefaultDialer: Boolean = false,
     isProtectionEnabled: Boolean,
     isAggressiveBlockingEnabled: Boolean,
     isOfflineModeForced: Boolean,
@@ -135,6 +313,9 @@ fun SettingsScreenContent(
     connectedProviders: List<String>,
     onSetThemeMode: (PreferencesManager.ThemeMode) -> Unit,
     onRequestRole: () -> Unit = {},
+    onRequestDefaultDialer: () -> Unit = {},
+    onShowRestrictedSettingsGuide: () -> Unit = {},
+    onSimulateCustomCall: (phone: String, contactName: String?) -> Unit = { _, _ -> },
     onTestNotification: () -> Unit = {},
     onToggleProtection: (Boolean) -> Unit,
     onToggleAggressiveBlocking: (Boolean) -> Unit,
@@ -256,13 +437,146 @@ fun SettingsScreenContent(
                 }
             }
 
-            // 2. INCOMING CALL SCREENING & NOTIFICATION EXPERIENCE (PHASE 4)
+            // 2. DEFAULT PHONE APP & CALLING INTERFACE
             Text(
-                text = "Call Screening & Notifications",
+                text = "Calling & Phone App Roles",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
 
+            // InCallService Default Dialer Card
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (isDefaultDialer) Icons.Default.CheckCircle else Icons.Default.Call,
+                                contentDescription = null,
+                                tint = if (isDefaultDialer) LegitGreen else BrandBlue,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (isDefaultDialer) "Default Phone App Active" else "Custom Calling UI (InCallService)",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        if (!isDefaultDialer) {
+                            TextButton(onClick = onRequestDefaultDialer) {
+                                Text("Set Default", fontSize = 12.sp, color = BrandBlue, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = if (isDefaultDialer)
+                            "SafeCall AI provides the custom fullscreen incoming-call screen and executes real Answer & Decline call actions directly through Android Telecom."
+                        else
+                            "Set SafeCall AI as your default phone app to enable the custom fullscreen incoming-call screen with verified evidence and real Answer/Decline buttons.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    if (!isDefaultDialer) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onShowRestrictedSettingsGuide() }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Security,
+                                    contentDescription = null,
+                                    tint = BrandBlue,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Seeing \"App was denied access\"?",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "Sideloaded apps need Restricted Settings enabled. Tap to fix in 3 steps.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                TextButton(onClick = onShowRestrictedSettingsGuide) {
+                                    Text("Fix", fontSize = 12.sp, color = BrandBlue, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Text(
+                        text = "Interactive Calling Screen Tests",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Test 1: Verified Logistics
+                    OutlinedButton(
+                        onClick = { onSimulateCustomCall("+919876543210", "Amazon Logistics") },
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Call, contentDescription = null, modifier = Modifier.size(16.dp), tint = LegitGreen)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Test Call: Amazon Logistics (Verified)")
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Test 2: Saved Contact
+                    OutlinedButton(
+                        onClick = { onSimulateCustomCall("+919876500001", "Dr. Ananya Sharma") },
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(16.dp), tint = BrandBlue)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Test Call: Saved Contact (Dr. Sharma)")
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Test 3: Potential Spam Warning
+                    OutlinedButton(
+                        onClick = { onSimulateCustomCall("+911409283100", "Credit Card Dept") },
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(16.dp), tint = SpamAmber)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Test Call: Suspicious Scam Alert")
+                    }
+                }
+            }
+
+            // Call Screening Service Card
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -291,7 +605,7 @@ fun SettingsScreenContent(
 
                         if (!isRoleHeld) {
                             TextButton(onClick = onRequestRole) {
-                                Text("Set Default", fontSize = 12.sp, color = BrandBlue)
+                                Text("Enable Role", fontSize = 12.sp, color = BrandBlue)
                             }
                         }
                     }
@@ -303,18 +617,16 @@ fun SettingsScreenContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                    // Test Live Notification Button
-                    Button(
+                    OutlinedButton(
                         onClick = onTestNotification,
-                        colors = ButtonDefaults.buttonColors(containerColor = BrandBlue),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Test Incoming Call Notification")
+                        Text("Test Heads-Up Screening Notification")
                     }
                 }
             }

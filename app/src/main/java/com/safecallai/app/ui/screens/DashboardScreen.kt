@@ -108,6 +108,9 @@ fun DashboardScreen(
                 Toast.makeText(context, "Heads-up notification triggered!", Toast.LENGTH_SHORT).show()
             }
         },
+        onLaunchCustomCallScreen = {
+            viewModel.simulateCustomCall(context, "+919876543210", "Amazon Logistics")
+        },
         onNavigateToCallerDetails = onNavigateToCallerDetails,
         onNavigateToActivity = onNavigateToActivity
     )
@@ -120,6 +123,7 @@ fun DashboardContent(
     onToggleProtection: (Boolean) -> Unit,
     onToggleExpectingDelivery: (Boolean) -> Unit,
     onTestNotification: () -> Unit = {},
+    onLaunchCustomCallScreen: () -> Unit = {},
     onNavigateToCallerDetails: (String) -> Unit,
     onNavigateToActivity: () -> Unit
 ) {
@@ -240,6 +244,20 @@ fun DashboardContent(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    // Test Custom Incoming-Call Screen Button
+                    Button(
+                        onClick = onLaunchCustomCallScreen,
+                        colors = ButtonDefaults.buttonColors(containerColor = BrandBlue),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Call, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Open Custom Incoming-Call Screen")
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     // Test Call Notification Button
                     OutlinedButton(
                         onClick = onTestNotification,
@@ -248,7 +266,7 @@ fun DashboardContent(
                     ) {
                         Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Test Incoming Call Notification")
+                        Text("Test Heads-Up Call Notification")
                     }
                 }
             }

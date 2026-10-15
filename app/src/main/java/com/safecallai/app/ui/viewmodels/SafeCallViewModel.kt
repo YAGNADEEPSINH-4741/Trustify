@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 data class DashboardUiState(
     val isRoleHeld: Boolean = false,
+    val isDefaultDialer: Boolean = false,
     val themeMode: com.safecallai.app.data.local.PreferencesManager.ThemeMode = com.safecallai.app.data.local.PreferencesManager.ThemeMode.SYSTEM_DEFAULT,
     val totalScreenedCount: Int = 0,
     val falseSpamRecoveredCount: Int = 0,
@@ -39,6 +40,7 @@ class SafeCallViewModel(application: Application) : AndroidViewModel(application
     private val app = application as SafeCallApplication
     private val repository = app.repository
     private val roleManager = CallScreeningRoleManager(application)
+    private val defaultDialerManager = com.safecallai.app.service.DefaultDialerManager(application)
 
     private val _uiState = MutableStateFlow(
         DashboardUiState(themeMode = repository.preferences.themeMode)
@@ -52,12 +54,14 @@ class SafeCallViewModel(application: Application) : AndroidViewModel(application
     fun refreshState() {
         viewModelScope.launch {
             val roleHeld = roleManager.isCallScreeningRoleHeld()
+            val isDefaultDialer = defaultDialerManager.isDefaultDialer()
             val stats = repository.getDashboardStats()
             val recent = repository.getRecentCallHistory(30)
             val trusted = repository.getTrustedCallers()
 
             _uiState.value = _uiState.value.copy(
                 isRoleHeld = roleHeld,
+                isDefaultDialer = isDefaultDialer,
                 themeMode = repository.preferences.themeMode,
                 totalScreenedCount = stats.first,
                 falseSpamRecoveredCount = stats.second,
@@ -69,6 +73,14 @@ class SafeCallViewModel(application: Application) : AndroidViewModel(application
                 recentCalls = recent,
                 trustedCallers = trusted
             )
+        }
+    }
+
+    fun getDefaultDialerManager(): com.safecallai.app.service.DefaultDialerManager = defaultDialerManager
+
+    fun simulateCustomCall(context: android.content.Context, rawNumber: String, contactName: String? = null) {
+        com.safecallai.app.service.CallManager.simulateIncomingCall(context, rawNumber, contactName) {
+            refreshState()
         }
     }
 

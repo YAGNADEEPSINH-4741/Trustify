@@ -1,0 +1,31 @@
+# Built application files and APKs
+*.apk
+*.aab
+*.aar
+*.ap_
+*.idsig
+
+# Gradle cache and intermediate build directories
+.gradle/
+build/
+app/build/
+*/build/
+bin/
+gen/
+out/
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+local.properties
+.DS_Store
+Thumbs.db
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Generated logs & IDE temp files
+*.log
+.system_generated/
