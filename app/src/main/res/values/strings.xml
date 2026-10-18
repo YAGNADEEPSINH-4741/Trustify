@@ -1,6 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SafeCall AI</string>
+    <!-- App & Branding -->
+    <string name="app_name">Trustify</string>
+    <string name="app_project_title">Trustify — Intelligent Caller Identification and False Spam Detection</string>
+    <string name="app_tagline">Your Calls. Your Privacy. Your Trust.</string>
     <string name="call_screening_service_description">Screens incoming calls to detect legitimate callers incorrectly flagged as spam and alerts you with verified evidence.</string>
-    <string name="notification_channel_name">Caller Identification Alerts</string>
-    <string name="notification_channel_description">Notifications when SafeCall AI screens an incoming call or recovers a false spam number.</string>
+    <string name="notification_channel_name">Trustify Caller Alerts</string>
+    <string name="notification_channel_description">Notifications when Trustify screens an incoming call or recovers a false spam number.</string>
+
+    <!-- First Launch Language Selection -->
+    <string name="language_selection_title">Choose Your Language</string>
+    <string name="language_selection_subtitle">Select your preferred language for Trustify. You can change this anytime in Settings.</string>
+    <string name="language_english">English</string>
+    <string name="language_hindi">हिंदी</string>
+    <string name="language_gujarati">ગુજરાતી</string>
+    <string name="language_continue">Continue</string>
+    <string name="language_privacy_footnote">100% On-Device • No Account Required</string>
+    <string name="language_settings_title">Language</string>
+    <string name="language_settings_subtitle">Select app language</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_activity">Activity</string>
+    <string name="nav_trusted">Trusted</string>
+    <string name="nav_report">Report</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_false_spam_title">The False Spam Problem</string>
+    <string name="onboarding_false_spam_desc">Delivery partners, drivers, and service agents place multiple calls daily. Generic apps often mislabel them as spam, causing missed deliveries and rides.\n\nTrustify evaluates genuine on-device context and verified registries to prevent false blocking without sending your personal data to any external server.</string>
+    <string name="onboarding_privacy_title">Privacy First</string>
+    <string name="onboarding_privacy_desc">• No contact list uploading or scraping\n• No call audio recording or eavesdropping\n• Core rules-based engine runs 100% offline\n• Independent evidence is separated from assumptions</string>
+    <string name="onboarding_screening_service">Call Screening Service</string>
+    <string name="onboarding_screening_active">Active: Selected as Call Screening App</string>
+    <string name="onboarding_screening_permission_needed">Permission needed to evaluate incoming calls</string>
+    <string name="onboarding_grant_role">Grant Call Screening Role</string>
+    <string name="onboarding_continue_btn">Continue to Dashboard</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_header_status_protected">PROTECTION ACTIVE</string>
+    <string name="dashboard_header_status_disabled">PROTECTION DISABLED</string>
+    <string name="dashboard_search_placeholder">Look up phone number locally...</string>
+    <string name="dashboard_expecting_delivery_title">Expecting a Delivery / Ride?</string>
+    <string name="dashboard_expecting_delivery_desc">Temporarily prioritizes delivery and transport caller verifications</string>
+    <string name="dashboard_stat_screened">Screened</string>
+    <string name="dashboard_stat_recovered">Recovered</string>
+    <string name="dashboard_stat_verified">Verified</string>
+    <string name="dashboard_recent_activity_title">Recent Activity</string>
+    <string name="dashboard_view_all">View All</string>
+    <string name="dashboard_no_recent_calls">No calls screened yet</string>
+    <string name="dashboard_no_recent_calls_desc">Incoming calls will appear here with instant on-device trust classification</string>
+    <string name="dashboard_default_phone_banner_title">Set Default Phone App</string>
+    <string name="dashboard_default_phone_banner_desc">Enable Trustify\'s fullscreen calling interface with Quick Reply</string>
+    <string name="dashboard_set_default_btn">Set Default</string>
+    <string name="dashboard_search_button">Evaluate</string>
+    <string name="dashboard_clear_search">Clear</string>
+
+    <!-- Recent Activity -->
+    <string name="activity_title">Screening Activity</string>
+    <string name="activity_filter_all">All Calls</string>
+    <string name="activity_filter_false_spam">False Spam</string>
+    <string name="activity_filter_verified">Verified</string>
+    <string name="activity_filter_potential_spam">Spam Alerts</string>
+    <string name="activity_clear_history">Clear History</string>
+    <string name="activity_clear_dialog_title">Clear Screening History?</string>
+    <string name="activity_clear_dialog_desc">This will delete all locally stored records of screened calls. This action cannot be undone.</string>
+    <string name="activity_clear_confirm">Clear All</string>
+
+    <!-- Trusted Callers -->
+    <string name="trusted_title">Trusted Callers</string>
+    <string name="trusted_add_btn">Add Trusted Caller</string>
+    <string name="trusted_add_dialog_title">Add Personal Trusted Caller</string>
+    <string name="trusted_add_dialog_desc">Adding a number to your personal trusted list will whitelist calls on your device only. It does not mark the caller as a verified public business.</string>
+    <string name="trusted_phone_label">Phone Number (+91...)</string>
+    <string name="trusted_name_label">Caller Name / Label (e.g. Society Gate)</string>
+    <string name="trusted_notes_label">Notes (Optional)</string>
+    <string name="trusted_save_btn">Add to Trusted</string>
+    <string name="trusted_remove_dialog_title">Remove Trusted Caller?</string>
+    <string name="trusted_remove_dialog_desc">This caller will no longer be prioritized as personally trusted.</string>
+    <string name="trusted_remove_confirm">Remove</string>
+
+    <!-- Report Number -->
+    <string name="report_title">Report a Number</string>
+    <string name="report_phone_label">Phone Number</string>
+    <string name="report_category_label">Report Reason</string>
+    <string name="report_category_incorrect_spam">Incorrect Spam Classification (Legitimate Caller)</string>
+    <string name="report_category_fraud">Financial Scam / Fraud Attempt</string>
+    <string name="report_category_impersonation">Impersonation / Fake Official</string>
+    <string name="report_category_telemarketing">Persistent Telemarketing</string>
+    <string name="report_category_harassment">Harassment / Abuse</string>
+    <string name="report_category_robocall">Automated Robocall</string>
+    <string name="report_description_label">Details / What happened?</string>
+    <string name="report_submit_btn">Submit Report Locally</string>
+    <string name="report_submitting">Saving locally...</string>
+
+    <!-- Caller Details -->
+    <string name="caller_details_title">Caller Details</string>
+    <string name="caller_details_call_btn">Call</string>
+    <string name="caller_details_copy_number">Copy Number</string>
+    <string name="caller_details_number_copied">Phone number copied to clipboard</string>
+    <string name="caller_details_trust_btn">Trust Caller</string>
+    <string name="caller_details_untrust_btn">Remove Trust</string>
+    <string name="caller_details_report_btn">Report Number</string>
+    <string name="caller_details_evidence_title">Identification Evidence</string>
+    <string name="caller_details_warnings_title">Security Warnings</string>
+
+    <!-- Incoming Call & Calling Controls -->
+    <string name="call_incoming">INCOMING CALL</string>
+    <string name="call_simulated">SIMULATED INCOMING CALL</string>
+    <string name="call_calling">CALLING...</string>
+    <string name="call_in_progress">CALL IN PROGRESS</string>
+    <string name="call_ended">Call Ended</string>
+    <string name="call_no_active">No active call</string>
+    <string name="call_answer">Answer</string>
+    <string name="call_decline">Decline</string>
+    <string name="call_end">End Call</string>
+    <string name="call_mute">Mute</string>
+    <string name="call_muted">Muted</string>
+    <string name="call_speaker">Speaker</string>
+    <string name="call_speaker_on">Speaker On</string>
+    <string name="call_send_message">Send Message</string>
+
+    <!-- Quick Reply Sheet & Composer -->
+    <string name="call_quick_reply_title">Quick Reply to Caller</string>
+    <string name="call_write_custom_title">Write Custom Message</string>
+    <string name="call_write_custom_btn">Write Your Own Message...</string>
+    <string name="call_custom_placeholder">Type your quick reply...</string>
+    <string name="call_chars_left">%d chars left (1 SMS)</string>
+    <string name="call_multi_segment">%1$d chars • %2$d SMS segments (%3$d left in current)</string>
+    <string name="call_unicode_encoding">Unicode encoding active</string>
+    <string name="call_send_btn">Send Message</string>
+    <string name="call_sending">Sending...</string>
+    <string name="call_send_dialog_title">Send Quick Reply?</string>
+    <string name="call_send_dialog_desc">This will decline the incoming call and transmit the message directly to the caller.</string>
+    <string name="call_send_sms_btn">Send SMS</string>
+    <string name="call_sms_permission_title">SMS Permission Needed</string>
+    <string name="call_sms_permission_desc">Trustify sends quick reply SMS messages directly to the caller without taking you away from the incoming call screen.\n\nWould you like to grant SMS permission, or open your default messaging app?</string>
+    <string name="call_grant_permission">Grant Permission</string>
+    <string name="call_open_messaging">Open Messaging App</string>
+    <string name="call_invalid_recipient">Caller\'s phone number is unavailable or private. An SMS text message cannot be sent to this caller.</string>
+
+    <!-- The 6 Predefined Quick Reply Messages -->
+    <string name="quick_reply_busy">I\'m busy right now. I\'ll call you back later.</string>
+    <string name="quick_reply_out_of_station">I\'m out of station at the moment.</string>
+    <string name="quick_reply_call_5_min">I\'ll call you in 5 minutes.</string>
+    <string name="quick_reply_driving">I\'m driving right now. I\'ll contact you when I arrive.</string>
+    <string name="quick_reply_cant_talk">I can\'t talk right now. Please message me.</string>
+    <string name="quick_reply_in_meeting">I\'m in a meeting. I\'ll call you back when I\'m free.</string>
+
+    <!-- Classification Badges & Verification Status -->
+    <string name="badge_verified_legitimate">VERIFIED LEGITIMATE</string>
+    <string name="badge_likely_legitimate">LIKELY LEGITIMATE</string>
+    <string name="badge_unknown">UNKNOWN CALLER</string>
+    <string name="badge_potential_spam">POTENTIAL SPAM</string>
+    <string name="badge_high_risk">HIGH-RISK ALERT</string>
+    <string name="status_corporate_registered">Corporate Registered</string>
+    <string name="status_active_dispatch">Active Dispatch Linked</string>
+    <string name="status_user_trusted">Personal Trust</string>
+    <string name="status_community_reports">Community Reports</string>
+    <string name="status_unverified">Unverified</string>
+    <string name="status_expired">Expired Registry</string>
+    <string name="status_conflicting_signals">Conflicting Signals</string>
+    <string name="subtitle_saved_contact">Saved in Phone Contacts</string>
+    <string name="explanation_saved_contact">Saved Contact: Recognized as a trusted caller from your phone contacts.</string>
+    <string name="subtitle_false_spam_recovered">★ False Spam Recovered</string>
+    <string name="subtitle_verified_business">Verified Business Entity</string>
+    <string name="subtitle_likely_legit">Likely Legitimate Caller</string>
+    <string name="subtitle_reported_suspicious">Reported Suspicious</string>
+    <string name="subtitle_critical_scam">Critical Scam / Fraud Alert</string>
+    <string name="subtitle_unverified">Unverified Number</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings &amp; Privacy</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme_pref">Theme Preference</string>
+    <string name="settings_theme_desc">Instant, persistent switching across all screens and system bars</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_protection_title">Caller Identification &amp; Protection</string>
+    <string name="settings_screening_service">Trustify Screening Service</string>
+    <string name="settings_screening_service_desc">Screens incoming calls locally to prevent false spam blocking</string>
+    <string name="settings_aggressive_blocking">Aggressive High-Risk Silencing</string>
+    <string name="settings_aggressive_active">Active: Silences confirmed scam / fraud numbers</string>
+    <string name="settings_aggressive_disabled">Disabled: Lets phone ring normally for all calls</string>
+    <string name="settings_permissions_roles">Permissions &amp; System Roles</string>
+    <string name="settings_default_phone_active">Default Phone App Active</string>
+    <string name="settings_default_phone_inactive">Default Phone App (InCallService)</string>
+    <string name="settings_default_phone_active_desc">Trustify provides the custom fullscreen incoming-call screen and executes real Answer &amp; Decline call actions directly through Android Telecom.</string>
+    <string name="settings_default_phone_inactive_desc">Set Trustify as your default phone app to enable the custom fullscreen incoming-call screen with verified evidence and real Answer/Decline buttons.</string>
+    <string name="settings_restricted_settings_title">Seeing \"App was denied access\"?</string>
+    <string name="settings_restricted_settings_desc">Sideloaded apps need Restricted Settings enabled. Tap to fix in 3 steps.</string>
+    <string name="settings_restricted_fix_btn">Fix</string>
+    <string name="settings_screening_role_active">Call Screening Role Active</string>
+    <string name="settings_screening_role_inactive">Call Screening Role Registered</string>
+    <string name="settings_enable_role">Enable Role</string>
+    <string name="settings_screening_role_desc">Allows Trustify to inspect incoming numbers before the phone rings and show live identification alerts.</string>
+    <string name="settings_interactive_tests">Interactive Calling Screen Tests</string>
+    <string name="settings_test_amazon">Test Call: Amazon Logistics (Verified)</string>
+    <string name="settings_test_contact">Test Call: Saved Contact (Dr. Sharma)</string>
+    <string name="settings_test_scam">Test Call: Suspicious Scam Alert</string>
+    <string name="settings_privacy_security_title">Privacy &amp; On-Device Security</string>
+    <string name="settings_privacy_card_title">Your Personal Data Stays on Your Device</string>
+    <string name="settings_privacy_card_content">Trustify is built from the ground up on technical privacy principles:\n\n• Zero Network Lookups: The core caller identification and classification engine runs 100% on-device. No internet permissions are requested.\n\n• No Account Required: You never need to sign up, provide an email, or create a profile to use Trustify.\n\n• Contacts Are Never Uploaded: The READ_CONTACTS permission is used strictly on-device to show your existing contact names during incoming calls. Contacts are never uploaded, scraped, or shared.\n\n• Trusted Numbers &amp; Call History: Your personal trusted callers, notes, and screening activity remain exclusively in your phone\'s local SQLite database and are excluded from cloud backups.\n\n• No Call Recording or Audio Interception: Trustify never records phone conversations or monitors call audio.</string>
+    <string name="settings_data_management">Local Data Management</string>
+    <string name="settings_clear_history">Clear Screened Call History</string>
+    <string name="settings_clear_cache">Clear Cached Business Registrations</string>
+    <string name="settings_reset_all">Reset All Local Data</string>
+    <string name="settings_reset_dialog_title">Reset All Local Data?</string>
+    <string name="settings_reset_dialog_desc">This will erase all screened call history, trusted callers list, local reports, and cached business registrations. All actions are on-device and permanent.</string>
+    <string name="settings_reset_confirm">Reset Everything</string>
+    <string name="settings_about">About Trustify</string>
+    <string name="settings_active_providers">Active Local Verification Providers:</string>
+    <string name="settings_version_info">Trustify v1.0.0 (Privacy-First On-Device Build)\nEngine: Deterministic Verification Rules v1.0</string>
+
+    <!-- Common Button Actions -->
+    <string name="btn_done">Done</string>
+    <string name="btn_close">Close</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_back">Back</string>
+
+    <!-- Additional Screen Strings -->
+    <string name="dashboard_tagline">Intelligent Caller ID • 100% On-Device</string>
+    <string name="dashboard_call_screening_protection">Call Screening Protection</string>
+    <string name="dashboard_screening_active_desc">Screening incoming calls locally to prevent false spam</string>
+    <string name="dashboard_screening_paused_desc">Protection paused — calls ring through unfiltered</string>
+    <string name="dashboard_service_active">Call Screening Service Active</string>
+    <string name="dashboard_role_needs_setup">Screening Role Needs Setup</string>
+    <string name="dashboard_setup_btn">Setup</string>
+    <string name="dashboard_instant_lookup">Instant Number Lookup</string>
+    <string name="dashboard_lookup_desc">Verify caller legitimacy and inspect on-device evidence</string>
+    <string name="dashboard_sample_scenarios">Sample Verification Scenarios:</string>
+    <string name="dashboard_privacy_notice">Your personal Trustify data stays on your device. Zero cloud uploads.</string>
+    <string name="dashboard_test_calling_screen">Test Calling Screen</string>
+    <string name="dashboard_test_notification">Test Notification</string>
+    <string name="dashboard_view_all_count">View All (%d)</string>
+    <string name="toast_screening_service_bound">Call Screening Service is bound automatically on this Android version</string>
+    <string name="toast_heads_up_triggered">Heads-up notification triggered!</string>
+
+    <string name="activity_empty_title">No Call Identification Activity Yet</string>
+    <string name="activity_empty_desc">Trustify monitors calls on-device. When incoming calls are screened or lookups are performed, they will appear here in your private local log.</string>
+    <string name="activity_no_matching_filter">No records match the selected filter.</string>
+    <string name="activity_filter_all_count">All (%d)</string>
+    <string name="activity_filter_false_spam_count">False Spam Recovered (%d)</string>
+    <string name="activity_filter_verified_count">Verified (%d)</string>
+    <string name="activity_filter_spam_risk">Spam / High-Risk</string>
+
+    <string name="trusted_principle_notice">Personal trust is stored strictly on your device. It never automatically marks an unverified caller as a verified public business for other users.</string>
+    <string name="trusted_empty_title">No Trusted Callers Added</string>
+    <string name="trusted_empty_desc">Add frequently called local service providers, apartment gates, or technicians to ensure their calls always ring normally.</string>
+    <string name="trusted_contact_name_label">Contact Name / Label</string>
+    <string name="trusted_contact_placeholder">e.g. Building Security, Clinic</string>
+
+    <string name="report_help_notice">Help prevent false spam blocking. If a genuine delivery partner, recruiter, or local business is wrongly flagged, save a report draft here. All records remain stored locally on your device.</string>
+    <string name="report_confirm_checkbox">I confirm this report is accurate to the best of my knowledge.</string>
+    <string name="report_details_placeholder">Describe the call context (e.g., \'Amazon delivery partner calling for order #1234, flagged as spam on Truecaller\')</string>
+
+    <string name="caller_details_analysis_title">Analysis &amp; Explanation</string>
+    <string name="caller_details_data_source">Data Source: %s</string>
+    <string name="caller_details_evidence_ledger">Supporting Evidence Ledger</string>
+    <string name="caller_details_evidence_subtitle">Independently verified records vs user expectations</string>
+    <string name="caller_details_no_evidence">No independent verification records found for this number.</string>
+    <string name="caller_details_cautions_title">Active Cautions &amp; Warnings</string>
+    <string name="caller_details_actions_title">Actions</string>
+    <string name="caller_details_mark_trusted">Mark as Personal Trusted Caller</string>
+    <string name="caller_details_remove_trusted">Remove from Trusted List</string>
+    <string name="caller_details_report_action">Report False Spam or Suspicious Activity</string>
+    <string name="caller_details_call_dialer">Call via Phone Dialer</string>
+    <string name="caller_details_evidence_format">Source: %1$s • Verified: %2$s • %3$s</string>
+    <string name="caller_details_independently_verified">Independently Verified</string>
+    <string name="caller_details_user_stated">User Stated</string>
+
+    <!-- InCall / Quick Reply Toasts -->
+    <string name="toast_sms_permission_denied">SMS permission denied. You can open your messaging app instead.</string>
+    <string name="toast_quick_reply_sent">Quick reply sent to %1$s%2$s. Call declined.</string>
+    <string name="toast_failed_send_sms">Failed to send SMS: %s</string>
+    <string name="toast_opened_messaging_app">Opened messaging app (SMS not sent automatically).</string>
+    <string name="toast_unable_open_messaging">Unable to open messaging app on this device.</string>
+    <string name="dashboard_pill_protected">PROTECTED</string>
+    <string name="dashboard_pill_paused">PAUSED</string>
+    <string name="dashboard_search_phone_hint">e.g. +91 98765 43210</string>
+    <string name="caller_details_unverified">Unverified Caller</string>
+    <string name="trusted_default_contact_name">Personal Contact</string>
+    <string name="cd_copy">Copy</string>
+    <string name="cd_clear">Clear</string>
+    <string name="cd_search">Lookup</string>
+
+    <!-- Community-Powered Spam Detection & Feedback -->
+    <string name="community_feedback_question">How would you classify this caller?</string>
+    <string name="community_report_spam">Report as Spam</string>
+    <string name="community_not_spam">Not Spam</string>
+    <string name="community_decide_later">Decide Later</string>
+    <string name="community_reported_spam">Community Reported Spam</string>
+    <string name="community_unknown_caller">Unknown Caller</string>
+    <string name="community_unverified_number">Unverified Number</string>
+    <string name="community_trusted">Community Trusted</string>
+    <string name="community_report_recorded">Your report has been recorded</string>
+    <string name="community_unable_to_check">Unable to check community reputation</string>
+    <string name="community_spam_count_format">Community spam reports: %1$d/%2$d</string>
+    <string name="community_trusted_notice">Community Trusted reflects crowdsourced feedback, not an absolute guarantee of safety.</string>
+    <string name="btn_ok">OK</string>
+    <string name="community_vote_failed">Failed to submit report. Please check your network and try again.</string>
+    <string name="community_vote_retry">Retry</string>
+    <string name="community_already_voted">You have already reported this caller.</string>
+    <string name="community_user_voted_indicator">Saved Record: %s</string>
+    <string name="call_hold">Hold</string>
+    <string name="call_resume">Resume</string>
+    <string name="call_holding">ON HOLD</string>
+    <string name="call_hold_unsupported">Hold is not supported for this active call.</string>
+    <string name="contacts_permission_title">Identify Saved Contacts</string>
+    <string name="contacts_permission_desc">Enable contacts access so Trustify can show the names you\'ve saved for your contacts during calls. Contacts are matched purely on-device and never uploaded.</string>
+    <string name="contacts_permission_enable">Enable Contacts</string>
+    <string name="contacts_permission_not_now">Not Now</string>
+
+    <!-- Caller Identity Sources & Labels -->
+    <string name="identity_source_saved_contact">Saved contact</string>
+    <string name="identity_source_network_cnap">Network-provided name</string>
+    <string name="identity_source_trai_telemarketing">Registered telemarketing series</string>
+    <string name="identity_source_trai_bfsi">Banking &amp; Financial Services (BFSI)</string>
+    <string name="identity_source_trai_logistics">Utilities &amp; Logistics Service</string>
+    <string name="identity_source_trai_tollfree">National toll-free service</string>
+    <string name="identity_source_trai_shared_cost">Shared-cost enterprise support</string>
+    <string name="identity_source_trai_emergency">National emergency helpline</string>
+    <string name="identity_source_osm_business">Public business listing</string>
+    <string name="identity_source_osm_attribution">Identity source: OpenStreetMap</string>
+    <string name="identity_source_no_match">No reliable name found</string>
 </resources>

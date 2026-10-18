@@ -1,6 +1,7 @@
 package com.safecallai.app.ui.navigation
 
 sealed class Screen(val route: String, val title: String) {
+    object LanguageSelection : Screen("language_selection", "Select Language")
     object Onboarding : Screen("onboarding", "Welcome")
     object Dashboard : Screen("dashboard", "Dashboard")
     object Activity : Screen("activity", "Recent Activity")

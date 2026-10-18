@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permissions for Call Screening, InCallService, and Network Operations -->
+    <!-- Permissions for Supabase Community Database, Call Screening, InCallService, and Contacts -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -33,7 +33,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Enables system to recognize SafeCall AI as eligible phone dialer -->
+            <!-- Enables system to recognize Trustify as eligible phone dialer -->
             <intent-filter>
                 <action android:name="android.intent.action.DIAL" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -53,7 +53,7 @@
             android:turnScreenOn="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.SafeCallAI"
-            android:windowSoftInputMode="adjustNothing" />
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- Android InCallService declaration for Default Dialer role -->
         <service
@@ -81,8 +81,7 @@
         <!-- Receivers for testing incoming call screening & calling screen via ADB -->
         <receiver
             android:name=".service.CallScreeningBroadcastReceiver"
-            android:permission="android.permission.DUMP"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.safecallai.app.SIMULATE_CALL" />
             </intent-filter>
@@ -90,8 +89,7 @@
 
         <receiver
             android:name=".service.IncomingCallTestReceiver"
-            android:permission="android.permission.DUMP"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.safecallai.app.SIMULATE_INCOMING_CALL" />
             </intent-filter>

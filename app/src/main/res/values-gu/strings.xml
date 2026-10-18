@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App & Branding -->
+    <string name="app_name">Trustify</string>
+    <string name="app_project_title">Trustify — ઇન્ટેલિજન્ટ કૉલર ઓળખ અને ખોટા સ્પામ અટકાવ</string>
+    <string name="app_tagline">તમારા કૉલ્સ. તમારી ગોપનીયતા. તમારો વિશ્વાસ.</string>
+    <string name="call_screening_service_description">ભૂલથી સ્પામ તરીકે ચિહ્નિત થયેલ સાચા કૉલર્સને ઓળખવા માટે ઇનકમિંગ કૉલ્સ તપાસે છે અને સાચા પુરાવા સાથે એલર્ટ કરે છે.</string>
+    <string name="notification_channel_name">Trustify કૉલર અલર્ટ્સ</string>
+    <string name="notification_channel_description">જ્યારે Trustify કૉલ તપાસે છે અથવા ખોટા સ્પામ નંબરની ઓળખ કરે છે ત્યારે મળતી સૂચનાઓ.</string>
+
+    <!-- First Launch Language Selection -->
+    <string name="language_selection_title">તમારી ભાષા પસંદ કરો</string>
+    <string name="language_selection_subtitle">Trustify માટે તમારી પસંદગીની ભાષા પસંદ કરો. તમે તેને સેટિંગ્સમાં ગમે ત્યારે બદલી શકો છો.</string>
+    <string name="language_english">English</string>
+    <string name="language_hindi">हिंदी</string>
+    <string name="language_gujarati">ગુજરાતી</string>
+    <string name="language_continue">આગળ વધો</string>
+    <string name="language_privacy_footnote">100% ડિવાઇસ પર • કોઈ ખાતાની જરૂર નથી</string>
+    <string name="language_settings_title">ભાષા (Language)</string>
+    <string name="language_settings_subtitle">એપની ભાષા પસંદ કરો</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">હોમ</string>
+    <string name="nav_activity">પ્રવૃત્તિ</string>
+    <string name="nav_trusted">વિશ્વાસુ</string>
+    <string name="nav_report">રિપોર્ટ</string>
+    <string name="nav_settings">સેટિંગ્સ</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_false_spam_title">ખોટા સ્પામની સમસ્યા</string>
+    <string name="onboarding_false_spam_desc">ડિલિવરી પાર્ટનર્સ, ડ્રાઇવર્સ અને સર્વિસ એજન્ટ્સ દરરોજ ઘણા કૉલ્સ કરે છે. સામાન્ય એપ્સ ઘણીવાર તેમને સ્પામ તરીકે ચિહ્નિત કરે છે, જેનાથી ડિલિવરી અને રાઇડ્સ ચૂકી જવાય છે.\n\nTrustify તમારા અંગત ડેટાને કોઈપણ સર્વર પર મોકલ્યા વિના, ડિવાઇસ પર જ સાચી ચકાસણી કરીને ખોટા બ્લૉકિંગને અટકાવે છે.</string>
+    <string name="onboarding_privacy_title">ગોપનીયતા પ્રથમ</string>
+    <string name="onboarding_privacy_desc">• કૉન્ટેક્ટ લિસ્ટ ક્યારેય અપલોડ થતી નથી\n• કૉલ રેકોર્ડિંગ કે વાતચીત સાંભળવામાં આવતી નથી\n• સંપૂર્ણ વેરિફિકેશન એન્જિન 100% ઑફલાઇન ચાલે છે\n• માત્ર સાચા પુરાવાના આધારે જ નિર્ણય લેવાય છે</string>
+    <string name="onboarding_screening_service">કૉલ સ્ક્રિનિંગ સેવા</string>
+    <string name="onboarding_screening_active">સક્રિય: કૉલ સ્ક્રિનિંગ એપ તરીકે પસંદ થયેલ છે</string>
+    <string name="onboarding_screening_permission_needed">ઇનકમિંગ કૉલ્સ ચકાસવા માટે પરવાનગી જરૂરી છે</string>
+    <string name="onboarding_grant_role">કૉલ સ્ક્રિનિંગ પરવાનગી આપો</string>
+    <string name="onboarding_continue_btn">ડેશબોર્ડ પર આગળ વધો</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_header_status_protected">સુરક્ષા સક્રિય</string>
+    <string name="dashboard_header_status_disabled">સુરક્ષા બંધ</string>
+    <string name="dashboard_search_placeholder">ફોન નંબર સ્થાનિક રીતે શોધો...</string>
+    <string name="dashboard_expecting_delivery_title">ડિલિવરી કે રાઇડની રાહ જોઈ રહ્યા છો?</string>
+    <string name="dashboard_expecting_delivery_desc">ડિલિવરી અને રાઇડ કૉલ્સની ચકાસણીને પ્રાથમિકતા આપે છે</string>
+    <string name="dashboard_stat_screened">ચકાસેલ</string>
+    <string name="dashboard_stat_recovered">રિકવર થયેલ</string>
+    <string name="dashboard_stat_verified">વેરિફાઇડ</string>
+    <string name="dashboard_recent_activity_title">તાજેતરની પ્રવૃત્તિ</string>
+    <string name="dashboard_view_all">બધા જુઓ</string>
+    <string name="dashboard_no_recent_calls">હજુ સુધી કોઈ કૉલ ચકાસાયેલ નથી</string>
+    <string name="dashboard_no_recent_calls_desc">ઇનકમિંગ કૉલ્સ તુરંત સ્થાનિક ચકાસણી સાથે અહીં દેખાશે</string>
+    <string name="dashboard_default_phone_banner_title">ડિફૉલ્ટ ફોન એપ સેટ કરો</string>
+    <string name="dashboard_default_phone_banner_desc">ક્વિક રિપ્લાય સાથે Trustify ની ફુલસ્ક્રીન કૉલિંગ સ્ક્રીન સક્ષમ કરો</string>
+    <string name="dashboard_set_default_btn">ડિફૉલ્ટ બનાવો</string>
+    <string name="dashboard_search_button">શોધો</string>
+    <string name="dashboard_clear_search">સાફ કરો</string>
+
+    <!-- Recent Activity -->
+    <string name="activity_title">સ્ક્રિનિંગ પ્રવૃત્તિ</string>
+    <string name="activity_filter_all">બધા કૉલ્સ</string>
+    <string name="activity_filter_false_spam">ખોટા સ્પામ</string>
+    <string name="activity_filter_verified">વેરિફાઇડ</string>
+    <string name="activity_filter_potential_spam">સ્પામ અલર્ટ્સ</string>
+    <string name="activity_clear_history">ઇતિહાસ સાફ કરો</string>
+    <string name="activity_clear_dialog_title">સ્ક્રિનિંગ ઇતિહાસ સાફ કરવો છે?</string>
+    <string name="activity_clear_dialog_desc">આ તમામ સ્થાનિક કૉલ રેકોર્ડ્સ કાઢી નાખશે. આ ક્રિયા પૂર્વવત્ કરી શકાશે નહીં.</string>
+    <string name="activity_clear_confirm">બધું સાફ કરો</string>
+
+    <!-- Trusted Callers -->
+    <string name="trusted_title">વિશ્વાસુ કૉલર્સ</string>
+    <string name="trusted_add_btn">વિશ્વાસુ કૉલર ઉમેરો</string>
+    <string name="trusted_add_dialog_title">અંગત વિશ્વાસુ કૉલર ઉમેરો</string>
+    <string name="trusted_add_dialog_desc">નંબરને તમારી અંગત સૂચિમાં ઉમેરવાથી તે ફક્ત તમારા ડિવાઇસ પર જ માન્ય રહેશે. તે કૉલરને સાર્વજનિક રૂપે વેરિફાઇડ વ્યવસાય બનાવતું નથી.</string>
+    <string name="trusted_phone_label">ફોન નંબર (+91...)</string>
+    <string name="trusted_name_label">કૉલરનું નામ / લેબલ (દા.ત. સોસાયટી ગેટ)</string>
+    <string name="trusted_notes_label">નોંધ (વૈકલ્પિક)</string>
+    <string name="trusted_save_btn">વિશ્વાસુ સૂચિમાં ઉમેરો</string>
+    <string name="trusted_remove_dialog_title">વિશ્વાસુ કૉલર હટાવવો છે?</string>
+    <string name="trusted_remove_dialog_desc">આ કૉલર હવે અંગત રીતે વિશ્વાસુ તરીકે ચિહ્નિત રહેશે નહીં.</string>
+    <string name="trusted_remove_confirm">હટાવો</string>
+
+    <!-- Report Number -->
+    <string name="report_title">નંબરની રિપોર્ટ કરો</string>
+    <string name="report_phone_label">ફોન નંબર</string>
+    <string name="report_category_label">રિપોર્ટનું કારણ</string>
+    <string name="report_category_incorrect_spam">ખોટું સ્પામ વર્ગીકરણ (સાચો કૉલર)</string>
+    <string name="report_category_fraud">નાણાકીય છેતરપિંડી / ફ્રોડનો પ્રયાસ</string>
+    <string name="report_category_impersonation">નકલી અધિકારી / ખોટી ઓળખ</string>
+    <string name="report_category_telemarketing">વારંવાર આવતા ટેલિમાર્કેટિંગ કૉલ</string>
+    <string name="report_category_harassment">પરેશાની / અયોગ્ય વર્તન</string>
+    <string name="report_category_robocall">ઑટોમેટેડ રોબોકૉલ</string>
+    <string name="report_description_label">વિગત / શું બન્યું હતું?</string>
+    <string name="report_submit_btn">સ્થાનિક રીતે રિપોર્ટ સબમિટ કરો</string>
+    <string name="report_submitting">સાચવી રહ્યું છે...</string>
+
+    <!-- Caller Details -->
+    <string name="caller_details_title">કૉલરની વિગતો</string>
+    <string name="caller_details_call_btn">કૉલ કરો</string>
+    <string name="caller_details_copy_number">નંબર કૉપી કરો</string>
+    <string name="caller_details_number_copied">ફોન નંબર કૉપી થયો</string>
+    <string name="caller_details_trust_btn">વિશ્વાસ કરો</string>
+    <string name="caller_details_untrust_btn">વિશ્વાસ હટાવો</string>
+    <string name="caller_details_report_btn">રિપોર્ટ કરો</string>
+    <string name="caller_details_evidence_title">ઓળખના પુરાવા</string>
+    <string name="caller_details_warnings_title">સુરક્ષા ચેતવણીઓ</string>
+
+    <!-- Incoming Call & Calling Controls -->
+    <string name="call_incoming">ઇનકમિંગ કૉલ</string>
+    <string name="call_simulated">સિમ્યુલેટેડ ઇનકમિંગ કૉલ</string>
+    <string name="call_calling">કૉલ થઈ રહ્યો છે...</string>
+    <string name="call_in_progress">કૉલ ચાલુ છે</string>
+    <string name="call_ended">કૉલ સમાપ્ત</string>
+    <string name="call_no_active">કોઈ સક્રિય કૉલ નથી</string>
+    <string name="call_answer">ઉપાડો</string>
+    <string name="call_decline">કાપો</string>
+    <string name="call_end">કૉલ પૂરો કરો</string>
+    <string name="call_mute">મ્યૂટ</string>
+    <string name="call_muted">મ્યૂટ છે</string>
+    <string name="call_speaker">સ્પીકર</string>
+    <string name="call_speaker_on">સ્પીકર ચાલુ</string>
+    <string name="call_send_message">મેસેજ મોકલો</string>
+
+    <!-- Quick Reply Sheet & Composer -->
+    <string name="call_quick_reply_title">કૉલરને ક્વિક રિપ્લાય</string>
+    <string name="call_write_custom_title">કસ્ટમ મેસેજ લખો</string>
+    <string name="call_write_custom_btn">તમારો પોતાનો મેસેજ લખો...</string>
+    <string name="call_custom_placeholder">તમારો ક્વિક રિપ્લાય લખો...</string>
+    <string name="call_chars_left">%d અક્ષરો બાકી (1 SMS)</string>
+    <string name="call_multi_segment">%1$d અક્ષરો • %2$d SMS ભાગ (વર્તમાનમાં %3$d બાકી)</string>
+    <string name="call_unicode_encoding">યુનિકોડ એન્કોડિંગ સક્રિય</string>
+    <string name="call_send_btn">મેસેજ મોકલો</string>
+    <string name="call_sending">મોકલી રહ્યું છે...</string>
+    <string name="call_send_dialog_title">ક્વિક રિપ્લાય મોકલવો છે?</string>
+    <string name="call_send_dialog_desc">આ ઇનકમિંગ કૉલ કાપી નાખશે અને કૉલરને સીધો મેસેજ મોકલશે.</string>
+    <string name="call_send_sms_btn">SMS મોકલો</string>
+    <string name="call_sms_permission_title">SMS પરવાનગી જરૂરી છે</string>
+    <string name="call_sms_permission_desc">Trustify કૉલ સ્ક્રીનમાંથી બહાર નીકળ્યા વિના કૉલરને સીધો ક્વિક SMS મોકલે છે.\n\nશું તમે SMS પરવાનગી આપવા માંગો છો, કે ડિફૉલ્ટ મેસેજિંગ એપ ખોલવા માંગો છો?</string>
+    <string name="call_grant_permission">પરવાનગી આપો</string>
+    <string name="call_open_messaging">મેસેજિંગ એપ ખોલો</string>
+    <string name="call_invalid_recipient">કૉલરનો ફોન નંબર અનુપલબ્ધ કે પ્રાઇવેટ છે. આ કૉલરને SMS મેસેજ મોકલી શકાતો નથી.</string>
+
+    <!-- The 6 Predefined Quick Reply Messages in Gujarati -->
+    <string name="quick_reply_busy">હું અત્યારે વ્યસ્ત છું. હું તમને પછીથી ફોન કરીશ.</string>
+    <string name="quick_reply_out_of_station">હું અત્યારે શહેરની બહાર છું.</string>
+    <string name="quick_reply_call_5_min">હું તમને 5 મિનિટમાં ફોન કરીશ.</string>
+    <string name="quick_reply_driving">હું અત્યારે વાહન ચલાવી રહ્યો/રહી છું. પહોંચીને વાત કરીશ.</string>
+    <string name="quick_reply_cant_talk">હું અત્યારે વાત નથી કરી શકતો/શકતી. કૃપા કરીને મને મેસેજ કરો.</string>
+    <string name="quick_reply_in_meeting">હું અત્યારે મીટિંગમાં છું. ફ્રી થઈને ફોન કરીશ.</string>
+
+    <!-- Classification Badges & Verification Status -->
+    <string name="badge_verified_legitimate">વેરિફાઇડ સાચો કૉલર</string>
+    <string name="badge_likely_legitimate">સંભવિત સાચો કૉલર</string>
+    <string name="badge_unknown">અજાણ્યો કૉલર</string>
+    <string name="badge_potential_spam">શંકાસ્પદ સ્પામ</string>
+    <string name="badge_high_risk">હાઈ-રિસ્ક અલર્ટ</string>
+    <string name="status_corporate_registered">કૉર્પોરેટ રજિસ્ટર્ડ</string>
+    <string name="status_active_dispatch">સક્રિય ડિલિવરી જોડાયેલ</string>
+    <string name="status_user_trusted">અંગત વિશ્વાસ</string>
+    <string name="status_community_reports">કમ્યુનિટી રિપોર્ટ્સ</string>
+    <string name="status_unverified">ચકાસાયેલ નથી</string>
+    <string name="status_expired">સમાપ્ત થયેલ રજિસ્ટ્રી</string>
+    <string name="status_conflicting_signals">પરસ્પર વિરોધી સંકેતો</string>
+    <string name="subtitle_saved_contact">ફોન કૉન્ટેક્ટ્સમાં સેવ થયેલ</string>
+    <string name="explanation_saved_contact">સેવ કરેલ સંપર્ક: તમારા ફોન સંપર્કોમાંથી વિશ્વસનીય કૉલર તરીકે ઓળખાયેલ.</string>
+    <string name="subtitle_false_spam_recovered">★ ખોટા સ્પામમાંથી રિકવર કરેલ</string>
+    <string name="subtitle_verified_business">વેરિફાઇડ બિઝનેસ એકમ</string>
+    <string name="subtitle_likely_legit">સંભવિત સાચો કૉલર</string>
+    <string name="subtitle_reported_suspicious">શંકાસ્પદ તરીકે નોંધાયેલ</string>
+    <string name="subtitle_critical_scam">ગંભીર છેતરપિંડી / ફ્રોડ અલર્ટ</string>
+    <string name="subtitle_unverified">ચકાસાયેલ નથી તેવો નંબર</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">સેટિંગ્સ અને ગોપનીયતા</string>
+    <string name="settings_appearance">દેખાવ (Appearance)</string>
+    <string name="settings_theme_pref">થીમ પસંદગી</string>
+    <string name="settings_theme_desc">તમામ સ્ક્રીન્સ પર તુરંત બદલાવ</string>
+    <string name="settings_theme_system">સિસ્ટમ</string>
+    <string name="settings_theme_light">લાઇટ</string>
+    <string name="settings_theme_dark">ડાર્ક</string>
+    <string name="settings_protection_title">કૉલર ઓળખ અને સુરક્ષા</string>
+    <string name="settings_screening_service">Trustify સ્ક્રિનિંગ સેવા</string>
+    <string name="settings_screening_service_desc">ખોટા સ્પામ બ્લૉકિંગને રોકવા માટે સ્થાનિક રીતે કૉલ્સ ચકાસે છે</string>
+    <string name="settings_aggressive_blocking">હાઈ-રિસ્ક કૉલ્સ સાયલન્ટ કરો</string>
+    <string name="settings_aggressive_active">સક્રિય: પુષ્ટિ થયેલ ફ્રોડ નંબર સાયલન્ટ કરે છે</string>
+    <string name="settings_aggressive_disabled">નિષ્ક્રિય: તમામ કૉલ્સ પર સામાન્ય રીતે રીંગ વાગે છે</string>
+    <string name="settings_permissions_roles">પરવાનગીઓ અને સિસ્ટમ રોલ્સ</string>
+    <string name="settings_default_phone_active">ડિફૉલ્ટ ફોન એપ સક્રિય</string>
+    <string name="settings_default_phone_inactive">ડિફૉલ્ટ ફોન એપ (InCallService)</string>
+    <string name="settings_default_phone_active_desc">Trustify ફુલસ્ક્રીન કૉલિંગ સ્ક્રીન પ્રદાન કરે છે અને એન્ડ્રોઇડ ટેલિકોમ દ્વારા કૉલ ઉપાડવા/કાપવાનું નિયંત્રિત કરે છે.</string>
+    <string name="settings_default_phone_inactive_desc">ચકાસાયેલ પુરાવા અને ક્વિક રિપ્લાય સાથે ફુલસ્ક્રીન કૉલ સ્ક્રીન સક્ષમ કરવા Trustify ને ડિફૉલ્ટ ફોન એપ બનાવો.</string>
+    <string name="settings_restricted_settings_title">\"App was denied access\" દેખાય છે?</string>
+    <string name="settings_restricted_settings_desc">સીધી ઇન્સ્ટોલ કરેલ એપ્સ માટે Restricted Settings ચાલુ કરવી જરૂરી છે. 3 સ્ટેપમાં ઠીક કરો.</string>
+    <string name="settings_restricted_fix_btn">ઠીક કરો</string>
+    <string name="settings_screening_role_active">કૉલ સ્ક્રિનિંગ રોલ સક્રિય</string>
+    <string name="settings_screening_role_inactive">કૉલ સ્ક્રિનિંગ રોલ રજિસ્ટર્ડ</string>
+    <string name="settings_enable_role">રોલ સક્ષમ કરો</string>
+    <string name="settings_screening_role_desc">ફોન વાગતા પહેલા Trustify ને નંબર તપાસવા અને લાઇવ ઓળખ અલર્ટ બતાવવાની પરવાનગી આપે છે.</string>
+    <string name="settings_interactive_tests">ઇન્ટરેક્ટિવ કૉલિંગ સ્ક્રીન ટેસ્ટ</string>
+    <string name="settings_test_amazon">ટેસ્ટ કૉલ: એમેઝોન લૉજિસ્ટિક્સ (વેરિફાઇડ)</string>
+    <string name="settings_test_contact">ટેસ્ટ કૉલ: સેવ કરેલ સંપર્ક (ડૉ. શર્મા)</string>
+    <string name="settings_test_scam">ટેસ્ટ કૉલ: શંકાસ્પદ સ્કેમ અલર્ટ</string>
+    <string name="settings_privacy_security_title">ગોપનીયતા અને ડિવાઇસ સુરક્ષા</string>
+    <string name="settings_privacy_card_title">તમારો અંગત ડેટા તમારા ડિવાઇસ પર જ રહે છે</string>
+    <string name="settings_privacy_card_content">Trustify ને ટેકનિકલ ગોપનીયતાના નિયમો પર બનાવવામાં આવી છે:\n\n• ઝીરો નેટવર્ક ઉપયોગ: કૉલર ઓળખ એન્જિન 100% ડિવાઇસ પર જ ચાલે છે. ઇન્ટરનેટની કોઈ પરવાનગી લેવાતી નથી.\n\n• કોઈ એકાઉન્ટની જરૂર નથી: વાપરવા માટે સાઇન અપ કે ઇમેઇલ આપવાની જરૂર નથી.\n\n• કૉન્ટેક્ટ્સ ક્યારેય અપલોડ થતા નથી: સંપર્કોની પરવાનગી ફક્ત ઇનકમિંગ કૉલ વખતે નામ દર્શાવવા માટે સ્થાનિક રીતે જ વપરાય છે.\n\n• વિશ્વાસુ નંબર્સ અને ઇતિહાસ: તમારો ડેટા ફક્ત તમારા ફોનના સ્થાનિક SQLite ડેટાબેઝમાં જ સંગ્રહિત રહે છે.\n\n• કોઈ કૉલ રેકોર્ડિંગ નહીં: Trustify ક્યારેય કૉલ રેકોર્ડ કરતું નથી કે વાતચીત સાંભળતું નથી.</string>
+    <string name="settings_data_management">સ્થાનિક ડેટા વ્યવસ્થાપન</string>
+    <string name="settings_clear_history">ચકાસાયેલ કૉલ ઇતિહાસ સાફ કરો</string>
+    <string name="settings_clear_cache">કેશ્ડ બિઝનેસ ડેટા સાફ કરો</string>
+    <string name="settings_reset_all">તમામ સ્થાનિક ડેટા રીસેટ કરો</string>
+    <string name="settings_reset_dialog_title">તમામ સ્થાનિક ડેટા રીસેટ કરવો છે?</string>
+    <string name="settings_reset_dialog_desc">આ તમામ કૉલ ઇતિહાસ, વિશ્વાસુ કૉલર્સ યાદી અને સ્થાનિક રિપોર્ટ્સ કાઢી નાખશે. આ ક્રિયા કાયમી છે.</string>
+    <string name="settings_reset_confirm">બધું રીસેટ કરો</string>
+    <string name="settings_about">Trustify વિશે</string>
+    <string name="settings_active_providers">સક્રિય સ્થાનિક ચકાસણી પ્રદાતાઓ:</string>
+    <string name="settings_version_info">Trustify v1.0.0 (Privacy-First On-Device Build)\nEngine: Deterministic Verification Rules v1.0</string>
+
+    <!-- Common Button Actions -->
+    <string name="btn_done">પૂર્ણ</string>
+    <string name="btn_close">બંધ કરો</string>
+    <string name="btn_cancel">રદ કરો</string>
+    <string name="btn_save">સાચવો</string>
+    <string name="btn_delete">કાઢી નાખો</string>
+    <string name="btn_back">પાછળ</string>
+
+    <!-- Additional Screen Strings -->
+    <string name="dashboard_tagline">સ્માર્ટ કૉલર આઈડી • 100% તમારા ડિવાઇસ પર</string>
+    <string name="dashboard_call_screening_protection">કૉલ સ્ક્રીનિંગ સુરક્ષા</string>
+    <string name="dashboard_screening_active_desc">ખોટા સ્પામ બ્લૉકિંગને રોકવા માટે ડિવાઇસ પર ઇનકમિંગ કૉલ્સ ચકાસવામાં આવે છે</string>
+    <string name="dashboard_screening_paused_desc">સુરક્ષા થોભાવેલ છે — કૉલ્સ ફિલ્ટર વગર વાગશે</string>
+    <string name="dashboard_service_active">કૉલ સ્ક્રીનિંગ સેવા સક્રિય</string>
+    <string name="dashboard_role_needs_setup">સ્ક્રીનિંગ ભૂમિકા સેટઅપ જરૂરી</string>
+    <string name="dashboard_setup_btn">સેટઅપ</string>
+    <string name="dashboard_instant_lookup">ત્વરિત નંબર શોધ</string>
+    <string name="dashboard_lookup_desc">કૉલરની માન્યતા તપાસો અને ડિવાઇસ પર પુરાવા જુઓ</string>
+    <string name="dashboard_sample_scenarios">નમૂના ચકાસણી પરિદ્રશ્યો:</string>
+    <string name="dashboard_privacy_notice">તમારો અંગત ટ્રસ્ટીફાય ડેટા તમારા ડિવાઇસ પર જ રહે છે. શૂન્ય ક્લાઉડ અપલોડ.</string>
+    <string name="dashboard_test_calling_screen">કૉલિંગ સ્ક્રીનની ચકાસણી કરો</string>
+    <string name="dashboard_test_notification">સૂચનાની ચકાસણી કરો</string>
+    <string name="dashboard_view_all_count">બધા જુઓ (%d)</string>
+    <string name="toast_screening_service_bound">આ એન્ડ્રોઇડ વર્ઝન પર કૉલ સ્ક્રીનિંગ સેવા આપમેળે જોડાયેલ છે</string>
+    <string name="toast_heads_up_triggered">ચેતવણી સૂચના ટ્રિગર થઈ!</string>
+
+    <string name="activity_empty_title">હજી સુધી કોઈ કૉલ ઓળખ પ્રવૃત્તિ નથી</string>
+    <string name="activity_empty_desc">ટ્રસ્ટીફાય તમારા ડિવાઇસ પર કૉલ્સનું નિરીક્ષણ કરે છે. જ્યારે ઇનકમિંગ કૉલ્સ સ્ક્રીન થાય અથવા શોધ કરવામાં આવે, ત્યારે તે તમારા ખાનગી લોગમાં દેખાશે.</string>
+    <string name="activity_no_matching_filter">પસંદ કરેલ ફિલ્ટર સાથે કોઈ રેકોર્ડ મેળ ખાતો નથી.</string>
+    <string name="activity_filter_all_count">બધા (%d)</string>
+    <string name="activity_filter_false_spam_count">રિકવર કરેલ ખોટો સ્પામ (%d)</string>
+    <string name="activity_filter_verified_count">વેરિફાઇડ (%d)</string>
+    <string name="activity_filter_spam_risk">સ્પામ / ઉચ્ચ જોખમ</string>
+
+    <string name="trusted_principle_notice">વ્યક્તિગત વિશ્વાસ ફક્ત તમારા ડિવાઇસ પર સંગ્રહિત થાય છે. તે અન્ય વપરાશકર્તાઓ માટે કોઈ અનવેરિફાઇડ કૉલરને સાર્વજનિક વ્યવસાય બનાવતું નથી.</string>
+    <string name="trusted_empty_title">કોઈ વિશ્વાસપાત્ર કૉલર ઉમેરેલ નથી</string>
+    <string name="trusted_empty_desc">વારંવાર કૉલ કરતા સ્થાનિક સેવા પ્રદાતાઓ, સોસાયટી ગેટ અથવા ટેકનિશિયનને ઉમેરો જેથી તેમના કૉલ્સ હંમેશા સામાન્ય રીતે વાગે.</string>
+    <string name="trusted_contact_name_label">સંપર્કનું નામ / લેબલ</string>
+    <string name="trusted_contact_placeholder">દા.ત. સોસાયટી ગેટ, ક્લિનિક</string>
+
+    <string name="report_help_notice">ખોટા સ્પામ બ્લૉકિંગને રોકવામાં મદદ કરો. જો કોઈ સાચા ડિલિવરી પાર્ટનર, રિક્રૂટર અથવા સ્થાનિક વ્યવસાયને ખોટી રીતે ફ્લેગ કરવામાં આવે, તો અહીં રિપોર્ટ સાચવો. બધા રેકોર્ડ તમારા ડિવાઇસ પર સુરક્ષિત રહે છે.</string>
+    <string name="report_confirm_checkbox">હું પુષ્ટિ કરું છું કે આ રિપોર્ટ મારી શ્રેષ્ઠ માહિતી અનુસાર સાચો છે.</string>
+    <string name="report_details_placeholder">કૉલ સંદર્ભનું વર્ણન કરો (દા.ત. \'ઓર્ડર માટે એમેઝોન ડિલિવરી પાર્ટનરનો કૉલ, ટ્રૂકૉલર પર સ્પામ દર્શાવેલ\')</string>
+
+    <string name="caller_details_analysis_title">વિશ્લેષણ અને સમજૂતી</string>
+    <string name="caller_details_data_source">ડેટા સ્ત્રોત: %s</string>
+    <string name="caller_details_evidence_ledger">સહાયક પુરાવા ખાતાવહી</string>
+    <string name="caller_details_evidence_subtitle">સ્વતંત્ર રીતે ચકાસાયેલ રેકોર્ડ્સ વિરુદ્ધ વપરાશકર્તા અપેક્ષાઓ</string>
+    <string name="caller_details_no_evidence">આ નંબર માટે કોઈ સ્વતંત્ર ચકાસણી રેકોર્ડ મળ્યો નથી.</string>
+    <string name="caller_details_cautions_title">સક્રિય સાવચેતીઓ અને ચેતવણીઓ</string>
+    <string name="caller_details_actions_title">પગલાં</string>
+    <string name="caller_details_mark_trusted">વ્યક્તિગત વિશ્વાસપાત્ર કૉલર તરીકે ચિહ્નિત કરો</string>
+    <string name="caller_details_remove_trusted">વિશ્વાસપાત્ર યાદીમાંથી દૂર કરો</string>
+    <string name="caller_details_report_action">ખોટા સ્પામ અથવા શંકાસ્પદ પ્રવૃત્તિની રિપોર્ટ કરો</string>
+    <string name="caller_details_call_dialer">ફોન ડાયલર દ્વારા કૉલ કરો</string>
+    <string name="caller_details_evidence_format">સ્ત્રોત: %1$s • ચકાસાયેલ: %2$s • %3$s</string>
+    <string name="caller_details_independently_verified">સ્વતંત્ર રીતે ચકાસાયેલ</string>
+    <string name="caller_details_user_stated">વપરાશકર્તા દ્વારા જણાવેલ</string>
+
+    <!-- InCall / Quick Reply Toasts -->
+    <string name="toast_sms_permission_denied">એસએમએસ પરવાનગી નકારી. તમે તેના બદલે તમારી મેસેજિંગ ઍપ ખોલી શકો છો.</string>
+    <string name="toast_quick_reply_sent">%1$s ને ઝડપી જવાબ મોકલ્યો%2$s. કૉલ અસ્વીકાર કર્યો.</string>
+    <string name="toast_failed_send_sms">એસએમએસ મોકલવામાં નિષ્ફળ: %s</string>
+    <string name="toast_opened_messaging_app">મેસેજિંગ ઍપ ખોલી (એસએમએસ આપમેળે મોકલાયો નથી).</string>
+    <string name="toast_unable_open_messaging">આ ડિવાઇસ પર મેસેજિંગ ઍપ ખોલવામાં અસમર્થ.</string>
+    <string name="dashboard_pill_protected">સુરક્ષિત</string>
+    <string name="dashboard_pill_paused">અટકાવેલ</string>
+    <string name="dashboard_search_phone_hint">દા.ત. +91 98765 43210</string>
+    <string name="caller_details_unverified">અનવેરિફાઇડ કૉલર</string>
+    <string name="trusted_default_contact_name">અંગત સંપર્ક</string>
+    <string name="cd_copy">કૉપિ કરો</string>
+    <string name="cd_clear">સાફ કરો</string>
+    <string name="cd_search">શોધો</string>
+
+    <!-- Community-Powered Spam Detection & Feedback (Gujarati) -->
+    <string name="community_feedback_question">તમે આ કૉલરને કેવી રીતે વર્ગીકૃત કરશો?</string>
+    <string name="community_report_spam">સ્પામ તરીકે રિપોર્ટ કરો</string>
+    <string name="community_not_spam">સ્પામ નથી</string>
+    <string name="community_decide_later">પછી નિર્ણય લો</string>
+    <string name="community_reported_spam">સમુદાય દ્વારા સ્પામ તરીકે રિપોર્ટ કરાયેલ</string>
+    <string name="community_unknown_caller">અજાણ્યો કોલર</string>
+    <string name="community_unverified_number">અચકાસેલો નંબર</string>
+    <string name="community_trusted">સમુદાય દ્વારા વિશ્વસનીય</string>
+    <string name="community_report_recorded">તમારી રિપોર્ટ નોંધાઈ ગઈ છે</string>
+    <string name="community_unable_to_check">સમુદાયની માહિતી મેળવી શકાઈ નથી</string>
+    <string name="community_spam_count_format">સમુદાય સ્પામ રિપોર્ટ્સ: %1$d/%2$d</string>
+    <string name="community_trusted_notice">સમુદાય દ્વારા વિશ્વસનીય માત્ર લોકોના મંતવ્યો દર્શાવે છે, સલામતીની સંપૂર્ણ ખાતરી નથી.</string>
+    <string name="btn_ok">બરાબર</string>
+    <string name="community_vote_failed">રિપોર્ટ સબમિટ કરવામાં નિષ્ફળ. કૃપા કરીને તમારું નેટવર્ક તપાસો અને ફરી પ્રયાસ કરો.</string>
+    <string name="community_vote_retry">ફરી પ્રયાસ કરો</string>
+    <string name="community_already_voted">તમે આ કૉલરનો રિપોર્ટ પહેલાથી જ કરી દીધો છે.</string>
+    <string name="community_user_voted_indicator">સાચવેલ રેકોર્ડ: %s</string>
+    <string name="call_hold">હોલ્ડ કરો</string>
+    <string name="call_resume">ચાલુ કરો</string>
+    <string name="call_holding">કૉલ હોલ્ડ પર છે</string>
+    <string name="call_hold_unsupported">આ સક્રિય કૉલ માટે કૉલ હોલ્ડ સમર્થિત નથી.</string>
+    <string name="contacts_permission_title">સાચવેલા સંપર્કોની ઓળખ કરો</string>
+    <string name="contacts_permission_desc">સંપર્ક પરવાનગી સક્ષમ કરો જેથી ટ્રસ્ટીફાઈ કૉલ દરમિયાન તમારા સાચવેલા સંપર્કોના નામ દર્શાવી શકે. સંપર્કો ફક્ત ઉપકરણ પર જ રહે છે અને ક્યારેય અપલોડ થતા નથી.</string>
+    <string name="contacts_permission_enable">સંપર્કો સક્ષમ કરો</string>
+    <string name="contacts_permission_not_now">હમણાં નહીં</string>
+
+    <!-- Caller Identity Sources & Labels (Gujarati) -->
+    <string name="identity_source_saved_contact">સાચવેલ સંપર્ક</string>
+    <string name="identity_source_network_cnap">નેટવર્ક-પ્રદાન કરેલ નામ</string>
+    <string name="identity_source_trai_telemarketing">નોંધાયેલ ટેલિમાર્કેટિંગ શ્રેણી</string>
+    <string name="identity_source_trai_bfsi">બેંકિંગ અને નાણાકીય સેવાઓ (BFSI)</string>
+    <string name="identity_source_trai_logistics">ઉપયોગિતા અને લોજિસ્ટિક્સ સેવા</string>
+    <string name="identity_source_trai_tollfree">રાષ્ટ્રીય ટોલ-ફ્રી સેવા</string>
+    <string name="identity_source_trai_shared_cost">શેર્ડ-કોસ્ટ એન્ટરપ્રાઇઝ સપોર્ટ</string>
+    <string name="identity_source_trai_emergency">રાષ્ટ્રીય કટોકટી હેલ્પલાઇન</string>
+    <string name="identity_source_osm_business">સાર્વજનિક વ્યવસાય સૂચિ</string>
+    <string name="identity_source_osm_attribution">ઓળખ સ્ત્રોત: OpenStreetMap</string>
+    <string name="identity_source_no_match">કોઈ વિશ્વસનીય નામ મળ્યું નથી</string>
+</resources>

@@ -3,6 +3,8 @@ package com.safecallai.app.domain.engine
 import com.safecallai.app.domain.models.CallerClassification
 import com.safecallai.app.domain.models.CallerProfile
 import com.safecallai.app.domain.models.ClassificationResult
+import com.safecallai.app.domain.models.CommunityClassification
+import com.safecallai.app.domain.models.CommunityReputation
 import com.safecallai.app.domain.models.Evidence
 import com.safecallai.app.domain.models.EvidenceType
 import com.safecallai.app.domain.models.UserTrustedCaller
@@ -30,6 +32,7 @@ class CallClassificationEngine {
         userTrustedRecord: UserTrustedCaller? = null,
         userExpectingDelivery: Boolean = false,
         isBackendAvailable: Boolean = true,
+        communityReputation: CommunityReputation? = null,
         currentTimeMillis: Long = System.currentTimeMillis()
     ): ClassificationResult {
         val normalized = PhoneNumberNormalizer.normalize(rawNumber)
@@ -53,7 +56,7 @@ class CallClassificationEngine {
                 verificationStatus = VerificationStatus.UNVERIFIED,
                 evidenceList = emptyList(),
                 warnings = warnings,
-                dataSource = "SafeCall AI Input Validator",
+                dataSource = "Trustify Input Validator",
                 explanation = "Classification unavailable: The phone number format is invalid or incomplete."
             )
         }
@@ -63,8 +66,8 @@ class CallClassificationEngine {
             warnings.add(
                 Warning(
                     code = "OFFLINE_MODE",
-                    title = "Backend Unreachable",
-                    message = "Cloud verification registry could not be reached. Local offline rules and cached data are being used.",
+                    title = "Offline Engine Active",
+                    message = "Operating 100% locally on-device. Local verified rules and cached data are being used.",
                     severity = WarningSeverity.INFO
                 )
             )
@@ -86,7 +89,7 @@ class CallClassificationEngine {
                     type = EvidenceType.COMMUNITY_REPUTATION,
                     title = "Impersonation Alert",
                     description = "Confirmed reports of identity spoofing associated with this phone number.",
-                    source = "SafeCall AI Threat Intelligence",
+                    source = "Trustify Threat Intelligence",
                     isIndependent = true,
                     timestamp = currentTimeMillis
                 )
@@ -101,7 +104,7 @@ class CallClassificationEngine {
                 category = profile.category,
                 evidenceList = evidenceList,
                 warnings = warnings,
-                dataSource = "SafeCall Threat Intelligence",
+                dataSource = "Trustify Threat Intelligence",
                 lastVerifiedTimestamp = profile.verifiedAt,
                 explanation = "HIGH-RISK ALERT: Although this number may resemble a known entity, multiple active reports indicate suspected impersonation or caller ID spoofing. Do NOT share OTPs, banking information, or passwords.",
                 isSafeToRingNormally = false,
@@ -120,7 +123,7 @@ class CallClassificationEngine {
                         type = EvidenceType.FALSE_SPAM_RECOVERY,
                         title = "False Spam Recovered",
                         description = "External spam reports were superseded by independent active dispatch verification.",
-                        source = "SafeCall Recovery Engine",
+                        source = "Trustify Recovery Engine",
                         isIndependent = true,
                         timestamp = currentTimeMillis
                     )
@@ -230,7 +233,7 @@ class CallClassificationEngine {
                         type = EvidenceType.FALSE_SPAM_RECOVERY,
                         title = "False Spam Mitigated",
                         description = "Community spam flags identified as false positives against a registered business entity.",
-                        source = "SafeCall Cross-Verification",
+                        source = "Trustify Cross-Verification",
                         isIndependent = true,
                         timestamp = currentTimeMillis
                     )
@@ -255,26 +258,27 @@ class CallClassificationEngine {
             )
         }
 
-        // 6. User Personal Trust
+        // 6. User Personal Trust & Saved Contacts
         if (userTrustedRecord != null) {
+            val isContact = userTrustedRecord.notes == "Saved in Phone Contacts"
             evidenceList.add(
                 Evidence(
                     type = EvidenceType.USER_WHITELIST,
-                    title = "Personal Trusted Contact",
-                    description = "Explicitly designated by you as '${userTrustedRecord.customLabel}'.",
-                    source = "Device Local Whitelist",
+                    title = if (isContact) "Saved Contact" else "Personal Trusted Contact",
+                    description = if (isContact) "Saved in your phone contacts as '${userTrustedRecord.customLabel}'." else "Explicitly designated by you as '${userTrustedRecord.customLabel}'.",
+                    source = if (isContact) "Device Contacts" else "Device Local Whitelist",
                     isIndependent = false,
                     timestamp = userTrustedRecord.createdAt
                 )
             )
 
-            val spamReports = profile?.spamReportsCount ?: 0
+            val spamReports = profile?.spamReportsCount ?: (communityReputation?.spamCount ?: 0)
             if (spamReports >= 15) {
                 warnings.add(
                     Warning(
                         code = "CONFLICTING_TRUST",
                         title = "Contradictory Community Signals",
-                        message = "This number is in your personal trusted list, but has recent community reports of spam.",
+                        message = if (isContact) "This number is in your contacts as '${userTrustedRecord.customLabel}', but has $spamReports recent community reports of spam." else "This number is in your personal trusted list, but has recent community reports of spam.",
                         severity = WarningSeverity.HIGH
                     )
                 )
@@ -284,11 +288,11 @@ class CallClassificationEngine {
                     classification = CallerClassification.LIKELY_LEGITIMATE,
                     verificationStatus = VerificationStatus.CONFLICTING_SIGNALS,
                     callerName = userTrustedRecord.customLabel,
-                    category = "Personal Whitelist",
+                    category = if (isContact) "Saved Contact" else "Personal Whitelist",
                     evidenceList = evidenceList,
                     warnings = warnings,
-                    dataSource = "Local Whitelist with Community Alert",
-                    explanation = "CONTRADICTORY EVIDENCE: Marked as trusted by your device settings as '${userTrustedRecord.customLabel}', but community reports show suspicious activity. Verify caller authenticity before sharing credentials.",
+                    dataSource = if (isContact) "Device Contacts with Community Alert" else "Local Whitelist with Community Alert",
+                    explanation = if (isContact) "SAVED CONTACT (COMMUNITY ALERT): Saved in your contacts as '${userTrustedRecord.customLabel}', but community reports show suspicious activity ($spamReports reports). Confirm identity before sharing sensitive details." else "CONTRADICTORY EVIDENCE: Marked as trusted by your device settings as '${userTrustedRecord.customLabel}', but community reports show suspicious activity. Verify caller authenticity before sharing credentials.",
                     isSafeToRingNormally = true
                 )
             }
@@ -296,14 +300,14 @@ class CallClassificationEngine {
             return ClassificationResult(
                 rawNumber = rawNumber,
                 normalizedNumber = normalized,
-                classification = CallerClassification.LIKELY_LEGITIMATE,
+                classification = if (isContact) CallerClassification.VERIFIED_LEGITIMATE else CallerClassification.LIKELY_LEGITIMATE,
                 verificationStatus = VerificationStatus.USER_TRUSTED,
                 callerName = userTrustedRecord.customLabel,
-                category = "Personal Whitelist",
+                category = if (isContact) "Saved Contact" else "Personal Whitelist",
                 evidenceList = evidenceList,
                 warnings = warnings,
-                dataSource = "Local Whitelist",
-                explanation = "TRUSTED CALLER: Marked as trusted by your personal device settings ('${userTrustedRecord.customLabel}'). Note: Personal trust does not certify this caller as a public business.",
+                dataSource = if (isContact) "Device Contacts" else "Local Whitelist",
+                explanation = if (isContact) "SAVED CONTACT: Saved in your phone contacts as '${userTrustedRecord.customLabel}'. Recognized as a trusted personal caller." else "TRUSTED CALLER: Marked as trusted by your personal device settings ('${userTrustedRecord.customLabel}'). Note: Personal trust does not certify this caller as a public business.",
                 isSafeToRingNormally = true
             )
         }
@@ -349,23 +353,27 @@ class CallClassificationEngine {
                     verificationStatus = VerificationStatus.UNVERIFIED,
                     evidenceList = evidenceList,
                     warnings = warnings,
-                    dataSource = "SafeCall Context Evaluator",
+                    dataSource = "Trustify Context Evaluator",
                     explanation = "UNKNOWN CALLER: Delivery verification is not connected. We could not independently confirm whether this caller is your delivery partner."
                 )
             }
         }
 
-        // 8. Community Spam Reports Thresholds
-        val spamCount = profile?.spamReportsCount ?: 0
+        // 8. Community-Powered Spam Detection Thresholds
+        // Core rule: At least 10 unique spam reports -> SPAM.
+        // Fewer than 10 spam reports -> must NOT automatically be classified as spam.
+        // Community Trusted: at least 10 not_spam votes and <= 2 spam votes.
+        val effectiveSpamCount = maxOf(profile?.spamReportsCount ?: 0, communityReputation?.spamCount ?: 0)
+        val effectiveNotSpamCount = maxOf(profile?.positiveConfirmationsCount ?: 0, communityReputation?.notSpamCount ?: 0)
         val falseSpamCount = profile?.falseSpamReportsCount ?: 0
 
-        if (spamCount >= 40 && falseSpamCount <= 1) {
+        if (effectiveSpamCount >= 40 && falseSpamCount <= 1) {
             evidenceList.add(
                 Evidence(
                     type = EvidenceType.COMMUNITY_REPUTATION,
                     title = "Severe Spam Activity",
-                    description = "$spamCount verified community reports of robocalls or scam attempts.",
-                    source = "Community Consensus Database",
+                    description = "$effectiveSpamCount verified community reports of robocalls or scam attempts.",
+                    source = "Trustify Community Database",
                     isIndependent = true,
                     timestamp = currentTimeMillis
                 )
@@ -374,7 +382,7 @@ class CallClassificationEngine {
                 Warning(
                     code = "HIGH_VOLUME_SPAM",
                     title = "High Volume Spam",
-                    message = "Significant consensus indicates aggressive unsolicited calling.",
+                    message = "Significant consensus indicates aggressive unsolicited calling ($effectiveSpamCount reports).",
                     severity = WarningSeverity.HIGH
                 )
             )
@@ -386,29 +394,29 @@ class CallClassificationEngine {
                 category = profile?.category ?: "Suspected Scam / Robocall",
                 evidenceList = evidenceList,
                 warnings = warnings,
-                dataSource = "Community Consensus",
-                explanation = "HIGH-RISK ALERT: Significant volume of consistent reports identify this number as abusive robocalls or fraud.",
+                dataSource = "Trustify Community Consensus",
+                explanation = "HIGH-RISK ALERT: Significant consensus ($effectiveSpamCount reports) identifies this number as abusive robocalls or fraud.",
                 isSafeToRingNormally = false
             )
         }
 
-        if (spamCount >= 10 && falseSpamCount <= (spamCount / 3)) {
+        if (effectiveSpamCount >= 10 && falseSpamCount <= (effectiveSpamCount / 3)) {
             evidenceList.add(
                 Evidence(
                     type = EvidenceType.COMMUNITY_REPUTATION,
-                    title = "Suspicious Calling Reports",
-                    description = "$spamCount reports of telemarketing or unwanted solicitation.",
-                    source = "Community Consensus Database",
+                    title = "Community Reported Spam",
+                    description = "$effectiveSpamCount unique community reports (threshold: 10).",
+                    source = "Trustify Community Database",
                     isIndependent = true,
                     timestamp = currentTimeMillis
                 )
             )
             warnings.add(
                 Warning(
-                    code = "POTENTIAL_SPAM_DETECTED",
-                    title = "Potential Spam",
-                    message = "Reports may be inaccurate. Review the available context before answering.",
-                    severity = WarningSeverity.MEDIUM
+                    code = "COMMUNITY_SPAM_DETECTED",
+                    title = "Community Reported Spam",
+                    message = "Classified as SPAM based on $effectiveSpamCount unique community reports.",
+                    severity = WarningSeverity.HIGH
                 )
             )
             return ClassificationResult(
@@ -419,20 +427,20 @@ class CallClassificationEngine {
                 category = profile?.category ?: "Telemarketing / Unsolicited",
                 evidenceList = evidenceList,
                 warnings = warnings,
-                dataSource = "Community Consensus",
-                explanation = "POTENTIAL SPAM: This number has suspicious reports. Reports may be inaccurate, so review the available evidence before deciding."
+                dataSource = "Trustify Community Consensus",
+                explanation = "COMMUNITY REPORTED SPAM: Classified as SPAM based on $effectiveSpamCount unique community reports.",
+                isSafeToRingNormally = false
             )
         }
 
-        // 9. Consistent Legitimate History without Enterprise Verification
-        val positiveConfirmations = profile?.positiveConfirmationsCount ?: 0
-        if (positiveConfirmations >= 10 && spamCount <= 2) {
+        // 9. Community Trusted: at least 10 not_spam votes and <= 2 spam votes
+        if (effectiveNotSpamCount >= 10 && effectiveSpamCount <= 2) {
             evidenceList.add(
                 Evidence(
                     type = EvidenceType.HISTORICAL_LEGITIMATE,
-                    title = "Positive Caller History",
-                    description = "$positiveConfirmations positive confirmations of legitimate service or business inquiries.",
-                    source = "SafeCall Historical Ledger",
+                    title = "Community Trusted",
+                    description = "$effectiveNotSpamCount positive community votes (under 10 spam reports). Note: Reflects community feedback, not a guarantee of safety.",
+                    source = "Trustify Community Ledger",
                     isIndependent = true,
                     timestamp = currentTimeMillis
                 )
@@ -447,12 +455,14 @@ class CallClassificationEngine {
                 category = profile?.category ?: "Service Provider",
                 evidenceList = evidenceList,
                 warnings = warnings,
-                dataSource = "Community Historical Ledger",
-                explanation = "LIKELY LEGITIMATE: This number has a consistent history of legitimate interactions, although official corporate registration is not recorded."
+                dataSource = "Trustify Community Ledger",
+                explanation = "COMMUNITY TRUSTED: Supported by $effectiveNotSpamCount positive community votes. Note: Community reputation reflects user feedback, not verified enterprise identity.",
+                isSafeToRingNormally = true
             )
         }
 
-        // 10. Default Safe Fallback: UNKNOWN CALLER
+        // 10. Default Fallback: UNVERIFIED / UNKNOWN CALLER
+        // A number with fewer than 10 spam reports or no reports must never be presented as definitively safe.
         return ClassificationResult(
             rawNumber = rawNumber,
             normalizedNumber = normalized,
@@ -463,8 +473,12 @@ class CallClassificationEngine {
             category = null,
             evidenceList = evidenceList,
             warnings = warnings,
-            dataSource = if (isBackendAvailable) "SafeCall Global Directory" else "Local Offline Cache",
-            explanation = "UNKNOWN CALLER: We could not independently verify this caller. Use caution when sharing personal or financial information.",
+            dataSource = if (!isBackendAvailable) "Trustify Local Offline Directory" else "Trustify Community Directory",
+            explanation = if (effectiveSpamCount in 1..9) {
+                "UNVERIFIED NUMBER: Received $effectiveSpamCount community spam reports (fewer than threshold of 10). Not automatically classified as spam."
+            } else {
+                "UNKNOWN CALLER: We could not independently verify this caller. Use caution when sharing personal or financial information."
+            },
             isSafeToRingNormally = true
         )
     }

@@ -30,6 +30,7 @@ enum class CallState {
     RINGING,
     DIALING,
     ACTIVE,
+    HOLDING,
     DISCONNECTED
 }
 
@@ -39,10 +40,13 @@ data class CallUiState(
     val displayNumber: String = "",
     val contactInfo: ContactInfo = ContactInfo(),
     val classificationResult: ClassificationResult? = null,
+    val callerIdentity: com.safecallai.app.domain.models.CallerIdentityResult? = null,
     val callState: CallState = CallState.IDLE,
     val durationSeconds: Long = 0L,
     val isMuted: Boolean = false,
     val isSpeakerOn: Boolean = false,
+    val isOnHold: Boolean = false,
+    val canHold: Boolean = false,
     val isSimulated: Boolean = false
 )
 
@@ -58,10 +62,12 @@ object CallManager {
     private val _callUiState = MutableStateFlow(CallUiState())
     val callUiState: StateFlow<CallUiState> = _callUiState.asStateFlow()
 
+    var elapsedRealtimeProvider: () -> Long = { android.os.SystemClock.elapsedRealtime() }
+    private var callConnectedElapsedRealtime: Long? = null
     private var activeCall: Call? = null
     private var inCallService: InCallService? = null
     private var durationJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.Main)
+    var coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     private var wakeLock: PowerManager.WakeLock? = null
     private var proximityWakeLock: PowerManager.WakeLock? = null
@@ -75,9 +81,16 @@ object CallManager {
                 Call.STATE_DIALING, Call.STATE_CONNECTING -> {
                     _callUiState.value = _callUiState.value.copy(callState = CallState.DIALING)
                 }
+                Call.STATE_HOLDING -> {
+                    _callUiState.value = _callUiState.value.copy(callState = CallState.HOLDING, isOnHold = true, canHold = true)
+                    ensureDurationTimerRunning()
+                }
                 Call.STATE_ACTIVE -> {
-                    _callUiState.value = _callUiState.value.copy(callState = CallState.ACTIVE)
-                    startDurationTimer()
+                    _callUiState.value = _callUiState.value.copy(callState = CallState.ACTIVE, isOnHold = false, canHold = true)
+                    if (callConnectedElapsedRealtime == null) {
+                        callConnectedElapsedRealtime = elapsedRealtimeProvider()
+                    }
+                    ensureDurationTimerRunning()
                     // Confirm audio routing to earpiece or currently selected route when call answers
                     try {
                         val currentRoute = inCallService?.callAudioState?.route ?: CallAudioState.ROUTE_EARPIECE
@@ -85,11 +98,29 @@ object CallManager {
                     } catch (_: Exception) {}
                 }
                 Call.STATE_DISCONNECTED, Call.STATE_DISCONNECTING -> {
+                    val finalDuration = callConnectedElapsedRealtime?.let { start ->
+                        ((elapsedRealtimeProvider() - start) / 1000L).coerceAtLeast(0L)
+                    } ?: _callUiState.value.durationSeconds
                     stopDurationTimer()
                     releaseWakeLocks()
-                    _callUiState.value = _callUiState.value.copy(callState = CallState.DISCONNECTED)
+                    _callUiState.value = _callUiState.value.copy(callState = CallState.DISCONNECTED, isOnHold = false, durationSeconds = finalDuration)
                 }
             }
+        }
+
+        override fun onDetailsChanged(call: Call, details: Call.Details) {
+            val isHolding = call.state == Call.STATE_HOLDING
+            val isActive = call.state == Call.STATE_ACTIVE
+            val currentIdentity = _callUiState.value.callerIdentity
+            val updatedIdentity = if (currentIdentity == null || currentIdentity.source != com.safecallai.app.domain.models.CallerIdentitySource.SAVED_CONTACT) {
+                com.safecallai.app.domain.engine.TelecomCnapExtractor.extract(details, _callUiState.value.rawNumber) ?: currentIdentity
+            } else {
+                currentIdentity
+            }
+            _callUiState.value = _callUiState.value.copy(
+                canHold = isHolding || isActive || true,
+                callerIdentity = updatedIdentity
+            )
         }
     }
 
@@ -129,13 +160,13 @@ object CallManager {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return
         try {
             if (wakeLock == null) {
-                wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SafeCallAI:CpuAudioLock").apply {
+                wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Trustify:CpuAudioLock").apply {
                     setReferenceCounted(false)
                     acquire(20 * 60 * 1000L) // 20 min safety timeout
                 }
             }
             if (proximityWakeLock == null && powerManager.isWakeLockLevelSupported(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)) {
-                proximityWakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "SafeCallAI:ProximityLock").apply {
+                proximityWakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "Trustify:ProximityLock").apply {
                     setReferenceCounted(false)
                     acquire(20 * 60 * 1000L)
                 }
@@ -165,6 +196,7 @@ object CallManager {
         rawNumber: String,
         contactInfo: ContactInfo,
         classificationResult: ClassificationResult?,
+        callerIdentity: com.safecallai.app.domain.models.CallerIdentityResult? = null,
         context: Context? = null
     ) {
         activeCall?.unregisterCallback(callCallback)
@@ -189,6 +221,27 @@ object CallManager {
         val currentAudioState = inCallService?.callAudioState
         val isSpeaker = currentAudioState?.route == CallAudioState.ROUTE_SPEAKER
         val isMuted = currentAudioState?.isMuted ?: false
+        val canHold = true
+
+        val initialIdentity = when {
+            callerIdentity != null -> callerIdentity
+            contactInfo.isSavedContact && !contactInfo.name.isNullOrBlank() -> {
+                com.safecallai.app.domain.models.CallerIdentityResult(
+                    rawNumber = rawNumber,
+                    normalizedNumber = normalized,
+                    displayName = contactInfo.name,
+                    source = com.safecallai.app.domain.models.CallerIdentitySource.SAVED_CONTACT,
+                    identityType = com.safecallai.app.domain.models.CallerIdentityType.SAVED_CONTACT,
+                    confidence = com.safecallai.app.domain.models.IdentityConfidence.VERIFIED,
+                    sourceLabel = "Saved contact",
+                    isVerified = true
+                )
+            }
+            else -> {
+                com.safecallai.app.domain.engine.TelecomCnapExtractor.extract(call.details, rawNumber)
+                    ?: com.safecallai.app.domain.engine.TraiNumberSeriesClassifier.classify(rawNumber)
+            }
+        }
 
         _callUiState.value = CallUiState(
             rawNumber = rawNumber,
@@ -196,10 +249,13 @@ object CallManager {
             displayNumber = display,
             contactInfo = contactInfo,
             classificationResult = classificationResult,
+            callerIdentity = initialIdentity,
             callState = initialState,
             durationSeconds = 0L,
             isMuted = isMuted,
             isSpeakerOn = isSpeaker,
+            isOnHold = (call.state == Call.STATE_HOLDING),
+            canHold = canHold,
             isSimulated = false
         )
 
@@ -212,8 +268,10 @@ object CallManager {
             } catch (_: Exception) {}
         }
 
+        callConnectedElapsedRealtime = null
         if (initialState == CallState.ACTIVE) {
-            startDurationTimer()
+            callConnectedElapsedRealtime = elapsedRealtimeProvider()
+            ensureDurationTimerRunning()
         }
     }
 
@@ -223,6 +281,23 @@ object CallManager {
     fun updateClassification(classificationResult: ClassificationResult) {
         _callUiState.value = _callUiState.value.copy(
             classificationResult = classificationResult
+        )
+    }
+
+    /**
+     * Updates caller identity asynchronously when identification resolves.
+     */
+    fun updateCallerIdentity(callerIdentity: com.safecallai.app.domain.models.CallerIdentityResult) {
+        // Do not let a weaker non-contact match overwrite a confirmed saved contact
+        val current = _callUiState.value.callerIdentity
+        if (current?.source == com.safecallai.app.domain.models.CallerIdentitySource.SAVED_CONTACT &&
+            callerIdentity.source != com.safecallai.app.domain.models.CallerIdentitySource.SAVED_CONTACT
+        ) {
+            return
+        }
+
+        _callUiState.value = _callUiState.value.copy(
+            callerIdentity = callerIdentity
         )
     }
 
@@ -237,8 +312,11 @@ object CallManager {
                 inCallService?.setAudioRoute(CallAudioState.ROUTE_EARPIECE)
             } catch (_: Exception) {}
         } else if (_callUiState.value.isSimulated) {
+            if (callConnectedElapsedRealtime == null) {
+                callConnectedElapsedRealtime = elapsedRealtimeProvider()
+            }
             _callUiState.value = _callUiState.value.copy(callState = CallState.ACTIVE)
-            startDurationTimer()
+            ensureDurationTimerRunning()
         }
     }
 
@@ -256,9 +334,12 @@ object CallManager {
                 }
             } catch (_: Exception) {}
         } else if (_callUiState.value.isSimulated) {
+            val finalDuration = callConnectedElapsedRealtime?.let { start ->
+                ((elapsedRealtimeProvider() - start) / 1000L).coerceAtLeast(0L)
+            } ?: _callUiState.value.durationSeconds
             stopDurationTimer()
             releaseWakeLocks()
-            _callUiState.value = _callUiState.value.copy(callState = CallState.DISCONNECTED)
+            _callUiState.value = _callUiState.value.copy(callState = CallState.DISCONNECTED, durationSeconds = finalDuration)
         }
     }
 
@@ -314,14 +395,45 @@ object CallManager {
     }
 
     /**
+     * Toggles call hold / resume using official Telecom Call.hold() and Call.unhold().
+     */
+    fun toggleHold(context: Context) {
+        val call = activeCall
+        if (call != null) {
+            try {
+                if (call.state == Call.STATE_HOLDING || _callUiState.value.isOnHold) {
+                    call.unhold()
+                    _callUiState.value = _callUiState.value.copy(isOnHold = false, callState = CallState.ACTIVE)
+                    ensureDurationTimerRunning()
+                } else if (call.state == Call.STATE_ACTIVE) {
+                    call.hold()
+                    _callUiState.value = _callUiState.value.copy(isOnHold = true, callState = CallState.HOLDING)
+                    ensureDurationTimerRunning()
+                }
+            } catch (_: Exception) {}
+        } else if (_callUiState.value.isSimulated) {
+            val newHold = !_callUiState.value.isOnHold
+            _callUiState.value = _callUiState.value.copy(
+                isOnHold = newHold,
+                callState = if (newHold) CallState.HOLDING else CallState.ACTIVE
+            )
+            ensureDurationTimerRunning()
+        }
+    }
+
+    /**
      * Cleans up when call ends.
      */
     fun unbindCall() {
+        val finalDuration = callConnectedElapsedRealtime?.let { start ->
+            ((elapsedRealtimeProvider() - start) / 1000L).coerceAtLeast(0L)
+        } ?: _callUiState.value.durationSeconds
         stopDurationTimer()
         releaseWakeLocks()
         activeCall?.unregisterCallback(callCallback)
         activeCall = null
-        _callUiState.value = _callUiState.value.copy(callState = CallState.DISCONNECTED)
+        callConnectedElapsedRealtime = null
+        _callUiState.value = _callUiState.value.copy(callState = CallState.DISCONNECTED, isOnHold = false, durationSeconds = finalDuration)
     }
 
     fun reset() {
@@ -329,17 +441,29 @@ object CallManager {
         releaseWakeLocks()
         activeCall?.unregisterCallback(callCallback)
         activeCall = null
+        callConnectedElapsedRealtime = null
         _callUiState.value = CallUiState()
     }
 
-    private fun startDurationTimer() {
-        stopDurationTimer()
-        durationJob = scope.launch {
-            var seconds = 0L
+    fun ensureDurationTimerRunning() {
+        val origin = callConnectedElapsedRealtime ?: return
+        val currentSec = ((elapsedRealtimeProvider() - origin) / 1000L).coerceAtLeast(0L)
+        if (_callUiState.value.durationSeconds != currentSec) {
+            _callUiState.value = _callUiState.value.copy(durationSeconds = currentSec)
+        }
+
+        if (durationJob?.isActive == true) {
+            return
+        }
+
+        durationJob = coroutineScope.launch {
             while (isActive) {
-                delay(1000L)
-                seconds++
-                _callUiState.value = _callUiState.value.copy(durationSeconds = seconds)
+                delay(500L)
+                val start = callConnectedElapsedRealtime ?: break
+                val seconds = ((elapsedRealtimeProvider() - start) / 1000L).coerceAtLeast(0L)
+                if (_callUiState.value.durationSeconds != seconds) {
+                    _callUiState.value = _callUiState.value.copy(durationSeconds = seconds)
+                }
             }
         }
     }
@@ -347,6 +471,12 @@ object CallManager {
     private fun stopDurationTimer() {
         durationJob?.cancel()
         durationJob = null
+    }
+
+    fun getCallConnectedElapsedRealtime(): Long? = callConnectedElapsedRealtime
+
+    fun setCallConnectedElapsedRealtimeForTesting(origin: Long?) {
+        callConnectedElapsedRealtime = origin
     }
 
     /**
@@ -364,7 +494,7 @@ object CallManager {
         val normalized = PhoneNumberNormalizer.normalize(rawNumber)
         val display = PhoneNumberNormalizer.formatForDisplay(normalized)
 
-        scope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             val result = repo.screenAndClassify(rawNumber, recordInHistory = true)
             val contactInfo = ContactInfo(
                 name = customContactName,
@@ -372,8 +502,9 @@ object CallManager {
                 isSavedContact = !customContactName.isNullOrBlank()
             )
 
-            scope.launch(Dispatchers.Main) {
+            coroutineScope.launch(Dispatchers.Default) {
                 activeCall = null
+                callConnectedElapsedRealtime = null
                 stopDurationTimer()
                 _callUiState.value = CallUiState(
                     rawNumber = rawNumber,
@@ -385,6 +516,8 @@ object CallManager {
                     durationSeconds = 0L,
                     isMuted = false,
                     isSpeakerOn = false,
+                    isOnHold = false,
+                    canHold = true,
                     isSimulated = true
                 )
 

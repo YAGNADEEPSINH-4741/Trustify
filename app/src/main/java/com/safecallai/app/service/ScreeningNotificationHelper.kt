@@ -31,8 +31,8 @@ object ScreeningNotificationHelper {
 
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Call Screening & Caller ID"
-            val descriptionText = "Displays real-time legitimate caller identification and false-spam recovery alerts"
+            val name = "Trustify Caller ID & Screening"
+            val descriptionText = "Displays real-time legitimate caller identification and false-spam recovery alerts by Trustify"
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
@@ -147,7 +147,11 @@ object ScreeningNotificationHelper {
         CoroutineScope(Dispatchers.IO).launch {
             val result = repository.screenAndClassify(rawNumber, recordInHistory = true)
             showCallScreenedNotification(context, result)
-            onComplete?.invoke(result)
+            if (onComplete != null) {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    onComplete.invoke(result)
+                }
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.safecallai.app.ui.screens
 
-import android.app.Activity
 import android.content.Intent
 import android.provider.Settings
 import android.widget.Toast
@@ -8,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,13 +26,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
@@ -42,14 +37,11 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -70,9 +62,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.safecallai.app.R
+import com.safecallai.app.data.local.AppLanguage
 import com.safecallai.app.data.local.PreferencesManager
 import com.safecallai.app.service.ScreeningNotificationHelper
 import com.safecallai.app.ui.theme.BrandBlue
@@ -95,7 +90,6 @@ fun SettingsScreen(
         contract = ActivityResultContracts.StartActivityForResult()
     ) {
         viewModel.refreshState()
-        // If system denied or cancelled setting default phone app (e.g. Android 13+ sideload restriction), show step-by-step guidance
         if (!viewModel.getDefaultDialerManager().isDefaultDialer()) {
             showRestrictedSettingsDialog = true
         }
@@ -131,7 +125,7 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
-                        text = "Because SafeCall AI was installed via WhatsApp or sideloading, Android restricts setting default apps until you allow Restricted Settings in App Info.",
+                        text = "Because Trustify was installed via direct download or sideloading, Android restricts setting default apps until you allow Restricted Settings in App Info.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -139,7 +133,7 @@ fun SettingsScreen(
                     Surface(
                         shape = RoundedCornerShape(12.dp),
                         color = MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
@@ -168,7 +162,7 @@ fun SettingsScreen(
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
-                                text = "4. Return here and tap \"Set Default\" (or \"Open Default Apps\").",
+                                text = "4. Return here and tap \"Set Default Phone App\".",
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Medium
                             )
@@ -185,8 +179,8 @@ fun SettingsScreen(
                         onClick = {
                             try {
                                 context.startActivity(viewModel.getDefaultDialerManager().createAppInfoIntent())
-                            } catch (e: Exception) {
-                                Toast.makeText(context, "Open Settings > Apps > SafeCall AI", Toast.LENGTH_SHORT).show()
+                            } catch (_: Exception) {
+                                Toast.makeText(context, "Open Settings > Apps > Trustify", Toast.LENGTH_SHORT).show()
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = BrandBlue),
@@ -200,7 +194,7 @@ fun SettingsScreen(
                         onClick = {
                             try {
                                 context.startActivity(viewModel.getDefaultDialerManager().createDefaultAppsIntent())
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 Toast.makeText(context, "Open Settings > Apps > Default apps", Toast.LENGTH_SHORT).show()
                             }
                         },
@@ -227,21 +221,20 @@ fun SettingsScreen(
 
     SettingsScreenContent(
         themeMode = uiState.themeMode,
+        appLanguage = uiState.appLanguage,
         isRoleHeld = uiState.isRoleHeld,
         isDefaultDialer = uiState.isDefaultDialer,
         isProtectionEnabled = uiState.isProtectionEnabled,
         isAggressiveBlockingEnabled = uiState.isAggressiveBlockingEnabled,
-        isOfflineModeForced = uiState.isOfflineModeForced,
-        initialSupabaseUrl = viewModel.getRepository().preferences.supabaseUrl,
-        initialSupabaseKey = viewModel.getRepository().preferences.supabaseAnonKey,
         connectedProviders = viewModel.getRepository().getConnectedProvidersInfo(),
         onSetThemeMode = { mode -> viewModel.setThemeMode(mode) },
+        onSetLanguage = { lang -> viewModel.setLanguage(lang, context) },
         onRequestRole = {
             val intent = viewModel.getRoleManager().createRequestRoleIntent()
             if (intent != null) {
                 try {
                     roleLauncher.launch(intent)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     Toast.makeText(context, "Call Screening Service is bound automatically on this Android version", Toast.LENGTH_LONG).show()
                 }
             } else {
@@ -250,24 +243,24 @@ fun SettingsScreen(
         },
         onRequestDefaultDialer = {
             if (viewModel.getDefaultDialerManager().isDefaultDialer()) {
-                Toast.makeText(context, "SafeCall AI is already your Default Phone App", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Trustify is already your Default Phone App", Toast.LENGTH_SHORT).show()
             } else {
                 val intent = viewModel.getDefaultDialerManager().createRequestDefaultDialerIntent()
                 if (intent != null) {
                     try {
                         defaultDialerLauncher.launch(intent)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         try {
                             defaultDialerLauncher.launch(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
-                        } catch (e2: Exception) {
-                            Toast.makeText(context, "Please set SafeCall AI in Settings > Apps > Default apps", Toast.LENGTH_LONG).show()
+                        } catch (_: Exception) {
+                            Toast.makeText(context, "Please set Trustify in Settings > Apps > Default apps", Toast.LENGTH_LONG).show()
                         }
                     }
                 } else {
                     try {
                         defaultDialerLauncher.launch(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
-                    } catch (e: Exception) {
-                        Toast.makeText(context, "Please set SafeCall AI in Settings > Apps > Default apps", Toast.LENGTH_LONG).show()
+                    } catch (_: Exception) {
+                        Toast.makeText(context, "Please set Trustify in Settings > Apps > Default apps", Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -285,16 +278,16 @@ fun SettingsScreen(
         },
         onToggleProtection = { viewModel.toggleProtection(it) },
         onToggleAggressiveBlocking = { viewModel.toggleAggressiveBlocking(it) },
-        onToggleOfflineMode = { viewModel.toggleOfflineMode(it) },
-        onUpdateSupabaseConfig = { url, key -> viewModel.updateSupabaseConfig(url, key) },
         onClearHistory = { viewModel.clearHistory() },
-        onResetAllData = {
-            viewModel.clearHistory()
+        onClearBusinessCache = {
             coroutineScope.launch {
-                val repo = viewModel.getRepository()
-                repo.getTrustedCallers().forEach { repo.removeTrustedCaller(it.id) }
-                viewModel.refreshState()
+                viewModel.getRepository().clearBusinessCache()
+                Toast.makeText(context, "Local business cache purged", Toast.LENGTH_SHORT).show()
             }
+        },
+        onResetAllData = {
+            viewModel.purgeAllLocalData()
+            Toast.makeText(context, "All local Trustify data cleared", Toast.LENGTH_SHORT).show()
         }
     )
 }
@@ -303,15 +296,14 @@ fun SettingsScreen(
 @Composable
 fun SettingsScreenContent(
     themeMode: PreferencesManager.ThemeMode,
+    appLanguage: AppLanguage,
     isRoleHeld: Boolean,
     isDefaultDialer: Boolean = false,
     isProtectionEnabled: Boolean,
     isAggressiveBlockingEnabled: Boolean,
-    isOfflineModeForced: Boolean,
-    initialSupabaseUrl: String,
-    initialSupabaseKey: String,
     connectedProviders: List<String>,
     onSetThemeMode: (PreferencesManager.ThemeMode) -> Unit,
+    onSetLanguage: (AppLanguage) -> Unit,
     onRequestRole: () -> Unit = {},
     onRequestDefaultDialer: () -> Unit = {},
     onShowRestrictedSettingsGuide: () -> Unit = {},
@@ -319,23 +311,18 @@ fun SettingsScreenContent(
     onTestNotification: () -> Unit = {},
     onToggleProtection: (Boolean) -> Unit,
     onToggleAggressiveBlocking: (Boolean) -> Unit,
-    onToggleOfflineMode: (Boolean) -> Unit,
-    onUpdateSupabaseConfig: (String, String) -> Unit,
     onClearHistory: () -> Unit,
+    onClearBusinessCache: () -> Unit = {},
     onResetAllData: () -> Unit
 ) {
     val scrollState = rememberScrollState()
-
     var showResetDialog by remember { mutableStateOf(false) }
-    var supabaseUrlInput by remember { mutableStateOf(initialSupabaseUrl) }
-    var supabaseKeyInput by remember { mutableStateOf(initialSupabaseKey) }
-    var configSavedMessage by remember { mutableStateOf(false) }
 
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
-            title = { Text("Reset All Local Data?") },
-            text = { Text("This will erase all screened call history, trusted callers list, and cached business registrations. This action cannot be undone.") },
+            title = { Text(stringResource(R.string.settings_reset_dialog_title)) },
+            text = { Text(stringResource(R.string.settings_reset_dialog_desc)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -343,12 +330,12 @@ fun SettingsScreenContent(
                         showResetDialog = false
                     }
                 ) {
-                    Text("Reset Everything", color = HighRiskRed, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.settings_reset_confirm), color = HighRiskRed, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showResetDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.btn_cancel))
                 }
             }
         )
@@ -357,7 +344,13 @@ fun SettingsScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings & Privacy", fontWeight = FontWeight.SemiBold) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.settings_title),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
@@ -375,43 +368,47 @@ fun SettingsScreenContent(
         ) {
             Spacer(modifier = Modifier.height(4.dp))
 
-            // 1. APPEARANCE & THEME SECTION (MANDATORY PHASE 3)
+            // 1. APPEARANCE & THEME & LANGUAGE SECTION
             Text(
-                text = "Appearance & Theme",
+                text = stringResource(R.string.settings_appearance),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
-            Card(
+            Surface(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    // Theme Preferences
                     Text(
-                        text = "Theme Preference",
+                        text = stringResource(R.string.settings_theme_pref),
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Choose how SafeCall AI appears across all screens and system bars",
+                        text = stringResource(R.string.settings_theme_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     // 3-Option Segmented Control: System Default, Light, Dark
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surface)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                             .padding(4.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         ThemeOptionChip(
-                            label = "System",
+                            label = stringResource(R.string.settings_theme_system),
                             icon = Icons.Default.BrightnessAuto,
                             isSelected = themeMode == PreferencesManager.ThemeMode.SYSTEM_DEFAULT,
                             modifier = Modifier.weight(1f),
@@ -419,7 +416,7 @@ fun SettingsScreenContent(
                         )
 
                         ThemeOptionChip(
-                            label = "Light",
+                            label = stringResource(R.string.settings_theme_light),
                             icon = Icons.Default.LightMode,
                             isSelected = themeMode == PreferencesManager.ThemeMode.LIGHT,
                             modifier = Modifier.weight(1f),
@@ -427,30 +424,169 @@ fun SettingsScreenContent(
                         )
 
                         ThemeOptionChip(
-                            label = "Dark",
+                            label = stringResource(R.string.settings_theme_dark),
                             icon = Icons.Default.DarkMode,
                             isSelected = themeMode == PreferencesManager.ThemeMode.DARK,
                             modifier = Modifier.weight(1f),
                             onClick = { onSetThemeMode(PreferencesManager.ThemeMode.DARK) }
                         )
                     }
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 16.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                    )
+
+                    // Language Preference Section
+                    Text(
+                        text = stringResource(R.string.language_settings_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = stringResource(R.string.language_settings_subtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // 3-Option Segmented Control: English, Hindi, Gujarati
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        LanguageOptionChip(
+                            label = "English",
+                            flag = "🇬🇧",
+                            isSelected = appLanguage == AppLanguage.ENGLISH,
+                            modifier = Modifier.weight(1f),
+                            onClick = { onSetLanguage(AppLanguage.ENGLISH) }
+                        )
+
+                        LanguageOptionChip(
+                            label = "हिंदी",
+                            flag = "🇮🇳",
+                            isSelected = appLanguage == AppLanguage.HINDI,
+                            modifier = Modifier.weight(1f),
+                            onClick = { onSetLanguage(AppLanguage.HINDI) }
+                        )
+
+                        LanguageOptionChip(
+                            label = "ગુજરાતી",
+                            flag = "🇮🇳",
+                            isSelected = appLanguage == AppLanguage.GUJARATI,
+                            modifier = Modifier.weight(1f),
+                            onClick = { onSetLanguage(AppLanguage.GUJARATI) }
+                        )
+                    }
                 }
             }
 
-            // 2. DEFAULT PHONE APP & CALLING INTERFACE
+            // 2. CALL SCREENING & PROTECTION PREFERENCES
             Text(
-                text = "Calling & Phone App Roles",
+                text = stringResource(R.string.settings_protection_title),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
-            // InCallService Default Dialer Card
-            Card(
+            Surface(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    // Master protection switch
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_screening_service),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_screening_service_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = isProtectionEnabled,
+                            onCheckedChange = onToggleProtection,
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = BrandBlue
+                            )
+                        )
+                    }
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                    )
+
+                    // Aggressive blocking toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_aggressive_blocking),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = if (isAggressiveBlockingEnabled)
+                                    stringResource(R.string.settings_aggressive_active)
+                                else
+                                    stringResource(R.string.settings_aggressive_disabled),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (isAggressiveBlockingEnabled) HighRiskRed else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = isAggressiveBlockingEnabled,
+                            onCheckedChange = onToggleAggressiveBlocking,
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = HighRiskRed
+                            )
+                        )
+                    }
+                }
+            }
+
+            // 3. PERMISSIONS & SYSTEM ROLES
+            Text(
+                text = stringResource(R.string.settings_permissions_roles),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    // Default Dialer Role Status
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -465,15 +601,19 @@ fun SettingsScreenContent(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = if (isDefaultDialer) "Default Phone App Active" else "Custom Calling UI (InCallService)",
+                                text = if (isDefaultDialer)
+                                    stringResource(R.string.settings_default_phone_active)
+                                else
+                                    stringResource(R.string.settings_default_phone_inactive),
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
 
                         if (!isDefaultDialer) {
                             TextButton(onClick = onRequestDefaultDialer) {
-                                Text("Set Default", fontSize = 12.sp, color = BrandBlue, fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.dashboard_set_default_btn), fontSize = 12.sp, color = BrandBlue, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -481,9 +621,9 @@ fun SettingsScreenContent(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = if (isDefaultDialer)
-                            "SafeCall AI provides the custom fullscreen incoming-call screen and executes real Answer & Decline call actions directly through Android Telecom."
+                            stringResource(R.string.settings_default_phone_active_desc)
                         else
-                            "Set SafeCall AI as your default phone app to enable the custom fullscreen incoming-call screen with verified evidence and real Answer/Decline buttons.",
+                            stringResource(R.string.settings_default_phone_inactive_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -492,8 +632,8 @@ fun SettingsScreenContent(
                         Spacer(modifier = Modifier.height(10.dp))
                         Surface(
                             shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surface,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { onShowRestrictedSettingsGuide() }
@@ -511,78 +651,30 @@ fun SettingsScreenContent(
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Seeing \"App was denied access\"?",
+                                        text = stringResource(R.string.settings_restricted_settings_title),
                                         style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
-                                        text = "Sideloaded apps need Restricted Settings enabled. Tap to fix in 3 steps.",
+                                        text = stringResource(R.string.settings_restricted_settings_desc),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                                 TextButton(onClick = onShowRestrictedSettingsGuide) {
-                                    Text("Fix", fontSize = 12.sp, color = BrandBlue, fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.settings_restricted_fix_btn), fontSize = 12.sp, color = BrandBlue, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Text(
-                        text = "Interactive Calling Screen Tests",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
 
-                    // Test 1: Verified Logistics
-                    OutlinedButton(
-                        onClick = { onSimulateCustomCall("+919876543210", "Amazon Logistics") },
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.Call, contentDescription = null, modifier = Modifier.size(16.dp), tint = LegitGreen)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Test Call: Amazon Logistics (Verified)")
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    // Test 2: Saved Contact
-                    OutlinedButton(
-                        onClick = { onSimulateCustomCall("+919876500001", "Dr. Ananya Sharma") },
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(16.dp), tint = BrandBlue)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Test Call: Saved Contact (Dr. Sharma)")
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    // Test 3: Potential Spam Warning
-                    OutlinedButton(
-                        onClick = { onSimulateCustomCall("+911409283100", "Credit Card Dept") },
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(16.dp), tint = SpamAmber)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Test Call: Suspicious Scam Alert")
-                    }
-                }
-            }
-
-            // Call Screening Service Card
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                    // Call Screening Service Role
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -597,310 +689,221 @@ fun SettingsScreenContent(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = if (isRoleHeld) "Call Screening Active" else "Screening Service Registered",
+                                text = if (isRoleHeld)
+                                    stringResource(R.string.settings_screening_role_active)
+                                else
+                                    stringResource(R.string.settings_screening_role_inactive),
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
 
                         if (!isRoleHeld) {
                             TextButton(onClick = onRequestRole) {
-                                Text("Enable Role", fontSize = 12.sp, color = BrandBlue)
+                                Text(stringResource(R.string.settings_enable_role), fontSize = 12.sp, color = BrandBlue)
                             }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "SafeCallScreeningService inspects incoming calls and displays heads-up verification alerts when numbers ring.",
+                        text = stringResource(R.string.settings_screening_role_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Text(
+                        text = stringResource(R.string.settings_interactive_tests),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     OutlinedButton(
-                        onClick = onTestNotification,
+                        onClick = { onSimulateCustomCall("+919876543210", "Amazon Logistics") },
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Call, contentDescription = null, modifier = Modifier.size(16.dp), tint = LegitGreen)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Test Heads-Up Screening Notification")
+                        Text(stringResource(R.string.settings_test_amazon))
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    OutlinedButton(
+                        onClick = { onSimulateCustomCall("+919876500001", "Dr. Ananya Sharma") },
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(16.dp), tint = BrandBlue)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.settings_test_contact))
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    OutlinedButton(
+                        onClick = { onSimulateCustomCall("+911409283100", "Credit Card Dept") },
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(16.dp), tint = SpamAmber)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.settings_test_scam))
                     }
                 }
             }
 
-            // 3. CALL SCREENING PREFERENCES
+            // 4. DEDICATED PRIVACY & ON-DEVICE SECURITY SECTION
             Text(
-                text = "Screening Preferences",
+                text = stringResource(R.string.settings_privacy_security_title),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
-            Card(
+            Surface(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    // Master protection switch
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "SafeCall Screening Service",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                text = "Evaluates incoming calls and prevents false spam blocking",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Switch(
-                            checked = isProtectionEnabled,
-                            onCheckedChange = onToggleProtection,
-                            colors = SwitchDefaults.colors(checkedThumbColor = BrandBlue)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // Aggressive blocking toggle
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Aggressive High-Risk Blocking",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                text = if (isAggressiveBlockingEnabled) "Active: Silences confirmed scam / fraud numbers" else "Disabled: Lets phone ring normally for all calls",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (isAggressiveBlockingEnabled) HighRiskRed else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Switch(
-                            checked = isAggressiveBlockingEnabled,
-                            onCheckedChange = onToggleAggressiveBlocking,
-                            colors = SwitchDefaults.colors(checkedThumbColor = HighRiskRed)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // Force Offline Mode toggle
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Force Offline Operation",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                text = "Screen calls entirely on-device without cloud network lookups",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Switch(
-                            checked = isOfflineModeForced,
-                            onCheckedChange = onToggleOfflineMode,
-                            colors = SwitchDefaults.colors(checkedThumbColor = SpamAmber)
-                        )
-                    }
-                }
-            }
-
-            // 4. CLOUD VERIFICATION BACKEND (SUPABASE)
-            Text(
-                text = "Cloud Verification Backend (Optional)",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(18.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = if (supabaseUrlInput.isNotBlank()) Icons.Default.Cloud else Icons.Default.CloudOff,
+                            imageVector = Icons.Default.Lock,
                             contentDescription = null,
-                            tint = if (supabaseUrlInput.isNotBlank()) LegitGreen else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp)
+                            tint = LegitGreen,
+                            modifier = Modifier.size(22.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = if (supabaseUrlInput.isNotBlank()) "Cloud Sync Configured" else "Local Standalone Mode Active",
+                            text = stringResource(R.string.settings_privacy_card_title),
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Connect a Supabase project to synchronize community verified business registries. If left empty, SafeCall operates completely offline.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    OutlinedTextField(
-                        value = supabaseUrlInput,
-                        onValueChange = {
-                            supabaseUrlInput = it
-                            configSavedMessage = false
-                        },
-                        label = { Text("Supabase Project URL") },
-                        placeholder = { Text("https://your-project.supabase.co") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    OutlinedTextField(
-                        value = supabaseKeyInput,
-                        onValueChange = {
-                            supabaseKeyInput = it
-                            configSavedMessage = false
-                        },
-                        label = { Text("Supabase Public Anon Key") },
-                        placeholder = { Text("eyJhbGciOiJIUzI1NiIsInR5c...") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
+                    Text(
+                        text = stringResource(R.string.settings_privacy_card_content),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 18.sp
                     )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Button(
-                        onClick = {
-                            onUpdateSupabaseConfig(supabaseUrlInput.trim(), supabaseKeyInput.trim())
-                            configSavedMessage = true
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = BrandBlue),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Save Configuration")
-                    }
-
-                    if (configSavedMessage) {
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "✓ Configuration saved successfully.",
-                            color = LegitGreen,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
                 }
             }
 
-            // 5. DATA MANAGEMENT
+            // 5. LOCAL DATA MANAGEMENT
             Text(
-                text = "Data Management",
+                text = stringResource(R.string.settings_data_management),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
-            Card(
+            Surface(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(18.dp)) {
                     OutlinedButton(
                         onClick = onClearHistory,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Default.Delete, contentDescription = null)
+                        Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Clear Screened Call History")
+                        Text(stringResource(R.string.settings_clear_history))
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedButton(
+                        onClick = onClearBusinessCache,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.settings_clear_cache))
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedButton(
                         onClick = { showResetDialog = true },
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = HighRiskRed),
+                        border = BorderStroke(1.dp, HighRiskRed.copy(alpha = 0.5f)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Reset All Local Data")
+                        Text(stringResource(R.string.settings_reset_all), fontWeight = FontWeight.Bold)
                     }
                 }
             }
 
-            // 6. PRIVACY COMMITMENTS CARD
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Lock, contentDescription = null, tint = LegitGreen)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Privacy Guarantees",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "• We do not collect or upload your contact address book.\n• SafeCall AI does not record audio or transcribe telephone conversations.\n• Phone numbers are normalized and checked against verifiable evidence.\n• You can purge all local data anytime.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            // 6. ABOUT TRUSTIFY
+            Text(
+                text = stringResource(R.string.settings_about),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
-            // 7. ACTIVE VERIFICATION PROVIDERS INFO
-            Card(
+            Surface(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(18.dp)) {
                     Text(
-                        text = "Active Verification Providers",
+                        text = stringResource(R.string.app_project_title),
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = stringResource(R.string.app_tagline),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = BrandBlue,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = stringResource(R.string.settings_active_providers),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
                     connectedProviders.forEach { provider ->
                         Text(
                             text = "• $provider",
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "SafeCall AI v1.0.0 (Production Build)\nEngine: Transparent Deterministic Rules v1.0",
+                        text = stringResource(R.string.settings_version_info),
                         fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        lineHeight = 15.sp
                     )
                 }
             }
@@ -947,66 +950,37 @@ private fun ThemeOptionChip(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(
-    name = "Settings - Dark",
-    showBackground = true,
-    backgroundColor = 0xFF0B111E,
-    device = androidx.compose.ui.tooling.preview.Devices.PIXEL_7,
-    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
-)
 @Composable
-fun PreviewSettingsDark() {
-    com.safecallai.app.ui.theme.SafeCallAITheme(darkTheme = true) {
-        SettingsScreenContent(
-            themeMode = PreferencesManager.ThemeMode.DARK,
-            isRoleHeld = true,
-            isProtectionEnabled = true,
-            isAggressiveBlockingEnabled = false,
-            isOfflineModeForced = false,
-            initialSupabaseUrl = "https://example.supabase.co",
-            initialSupabaseKey = "anon-key-12345",
-            connectedProviders = listOf("Mock Logistics Provider (Amazon, Flipkart)", "Mock Ride-Hailing Provider (Uber, Ola)", "Local SQLite Deterministic Cache"),
-            onSetThemeMode = {},
-            onRequestRole = {},
-            onTestNotification = {},
-            onToggleProtection = {},
-            onToggleAggressiveBlocking = {},
-            onToggleOfflineMode = {},
-            onUpdateSupabaseConfig = { _, _ -> },
-            onClearHistory = {},
-            onResetAllData = {}
-        )
-    }
-}
-
-@androidx.compose.ui.tooling.preview.Preview(
-    name = "Settings - Light",
-    showBackground = true,
-    backgroundColor = 0xFFF8FAFC,
-    device = androidx.compose.ui.tooling.preview.Devices.PIXEL_7,
-    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_NO
-)
-@Composable
-fun PreviewSettingsLight() {
-    com.safecallai.app.ui.theme.SafeCallAITheme(darkTheme = false) {
-        SettingsScreenContent(
-            themeMode = PreferencesManager.ThemeMode.LIGHT,
-            isRoleHeld = false,
-            isProtectionEnabled = true,
-            isAggressiveBlockingEnabled = true,
-            isOfflineModeForced = true,
-            initialSupabaseUrl = "",
-            initialSupabaseKey = "",
-            connectedProviders = listOf("Local SQLite Deterministic Cache (Standalone)"),
-            onSetThemeMode = {},
-            onRequestRole = {},
-            onTestNotification = {},
-            onToggleProtection = {},
-            onToggleAggressiveBlocking = {},
-            onToggleOfflineMode = {},
-            onUpdateSupabaseConfig = { _, _ -> },
-            onClearHistory = {},
-            onResetAllData = {}
-        )
+private fun LanguageOptionChip(
+    label: String,
+    flag: String,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (isSelected) BrandBlue else Color.Transparent)
+            .clickable(onClick = onClick)
+            .padding(vertical = 10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = flag,
+                fontSize = 13.sp
+            )
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }

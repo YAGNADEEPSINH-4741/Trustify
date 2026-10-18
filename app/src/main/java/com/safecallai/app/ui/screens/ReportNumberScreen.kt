@@ -47,9 +47,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.safecallai.app.R
 import com.safecallai.app.domain.engine.PhoneNumberNormalizer
 import com.safecallai.app.domain.models.ReportCategory
 import com.safecallai.app.ui.theme.BrandBlue
@@ -99,10 +101,10 @@ fun ReportNumberScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Report a Number", fontWeight = FontWeight.SemiBold) },
+                title = { Text(stringResource(R.string.report_title), fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.btn_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -140,7 +142,7 @@ fun ReportNumberScreenContent(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Help prevent false spam blocking. If a genuine delivery partner, recruiter, or business is wrongly flagged, report them here to trigger verification review.",
+                        text = stringResource(R.string.report_help_notice),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -199,7 +201,7 @@ fun ReportNumberScreenContent(
                     phoneNumber = it
                     onClearMessages()
                 },
-                label = { Text("Phone Number") },
+                label = { Text(stringResource(R.string.report_phone_label)) },
                 placeholder = { Text("e.g. +91 98765 43210") },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
@@ -213,10 +215,10 @@ fun ReportNumberScreenContent(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedTextField(
-                    value = selectedCategory.displayName,
+                    value = stringResource(selectedCategory.labelRes),
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Report Category") },
+                    label = { Text(stringResource(R.string.report_category_label)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDropdownExpanded) },
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
@@ -229,7 +231,7 @@ fun ReportNumberScreenContent(
                 ) {
                     ReportCategory.values().forEach { category ->
                         DropdownMenuItem(
-                            text = { Text(category.displayName) },
+                            text = { Text(stringResource(category.labelRes)) },
                             onClick = {
                                 selectedCategory = category
                                 isDropdownExpanded = false
@@ -246,8 +248,8 @@ fun ReportNumberScreenContent(
                     description = it
                     onClearMessages()
                 },
-                label = { Text("Details & Evidence") },
-                placeholder = { Text("Describe the call context (e.g., 'Amazon delivery partner calling for order #1234, flagged as spam on Truecaller')") },
+                label = { Text(stringResource(R.string.report_description_label)) },
+                placeholder = { Text(stringResource(R.string.report_details_placeholder)) },
                 minLines = 4,
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -264,7 +266,7 @@ fun ReportNumberScreenContent(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "I confirm this report is accurate to the best of my knowledge.",
+                    text = stringResource(R.string.report_confirm_checkbox),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -294,7 +296,7 @@ fun ReportNumberScreenContent(
                     )
                 } else {
                     Text(
-                        text = "Submit Report",
+                        text = stringResource(R.string.report_submit_btn),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -315,7 +317,7 @@ fun ReportNumberScreenContent(
 )
 @Composable
 fun PreviewReportNumberDark() {
-    com.safecallai.app.ui.theme.SafeCallAITheme(darkTheme = true) {
+    com.safecallai.app.ui.theme.TrustifyTheme(darkTheme = true) {
         ReportNumberScreenContent(
             initialPhoneNumber = "+919876543210",
             reportSuccessMessage = null,
@@ -334,10 +336,10 @@ fun PreviewReportNumberDark() {
 )
 @Composable
 fun PreviewReportNumberLight() {
-    com.safecallai.app.ui.theme.SafeCallAITheme(darkTheme = false) {
+    com.safecallai.app.ui.theme.TrustifyTheme(darkTheme = false) {
         ReportNumberScreenContent(
             initialPhoneNumber = "+919876543210",
-            reportSuccessMessage = "Report submitted successfully! Thank you for helping protect users against false spam.",
+            reportSuccessMessage = "Report saved to local database successfully. Stored on-device.",
             reportErrorMessage = null,
             isSubmittingReport = false
         )

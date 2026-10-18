@@ -4,12 +4,19 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Shield Outline -->
+    <!-- Outer Shield Crest -->
     <path
-        android:fillColor="#1A73E8"
-        android:pathData="M54,20 L84,34 L84,56 C84,74 71,89 54,94 C37,89 24,74 24,56 L24,34 Z"/>
-    <!-- Inner Check & Phone detail -->
+        android:fillColor="#1E3A8A"
+        android:pathData="M54,16 L84,28 C84,54 74,78 54,92 C34,78 24,54 24,28 Z" />
+    <!-- Gradient Inner Shield -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M49,63 L38,52 L42,48 L49,55 L66,38 L70,42 Z"/>
+        android:fillColor="#2563EB"
+        android:pathData="M54,20 L80,31 C80,53 71,73 54,86 C37,73 28,53 28,31 Z" />
+    <!-- Trustify Core T-Shield Geometry & Check Accent -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M38,36 L70,36 L70,43 L58,43 L58,74 L50,74 L50,43 L38,43 Z" />
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M49,60 L41,52 L44,49 L49,54 L64,39 L67,42 Z" />
 </vector>

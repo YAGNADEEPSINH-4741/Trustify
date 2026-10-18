@@ -4,14 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Icon
@@ -22,14 +21,18 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -39,18 +42,30 @@ import androidx.navigation.navArgument
 import com.safecallai.app.ui.navigation.Screen
 import com.safecallai.app.ui.screens.CallerDetailsScreen
 import com.safecallai.app.ui.screens.DashboardScreen
+import com.safecallai.app.ui.screens.LanguageSelectionScreen
 import com.safecallai.app.ui.screens.OnboardingScreen
 import com.safecallai.app.ui.screens.RecentActivityScreen
 import com.safecallai.app.ui.screens.ReportNumberScreen
 import com.safecallai.app.ui.screens.SettingsScreen
 import com.safecallai.app.ui.screens.TrustedCallersScreen
 import com.safecallai.app.ui.theme.BrandBlue
-import com.safecallai.app.ui.theme.SafeCallAITheme
+import com.safecallai.app.ui.theme.TrustifyTheme
 import com.safecallai.app.ui.viewmodels.SafeCallViewModel
+import android.content.Context
+import androidx.activity.compose.LocalActivityResultRegistryOwner
+import com.safecallai.app.data.local.AppLanguage
+import com.safecallai.app.util.LocaleHelper
 
 class MainActivity : ComponentActivity() {
 
     private val viewModel: SafeCallViewModel by viewModels()
+
+    override fun attachBaseContext(newBase: Context) {
+        val app = newBase.applicationContext as? SafeCallApplication
+        val lang = app?.repository?.preferences?.appLanguage ?: AppLanguage.ENGLISH
+        val localizedContext = LocaleHelper.createLocalizedContext(newBase, lang)
+        super.attachBaseContext(localizedContext)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,15 +74,33 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val uiState by viewModel.uiState.collectAsState()
-            SafeCallAITheme(themeMode = uiState.themeMode) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    SafeCallApp(
-                        viewModel = viewModel,
-                        initialPhoneNumber = initialPhoneNumber
-                    )
+
+            // Dynamic locale binding for Jetpack Compose string resources
+            val localizedContext = remember(uiState.appLanguage) {
+                LocaleHelper.createLocalizedContext(this@MainActivity, uiState.appLanguage)
+            }
+            val localizedConfiguration = remember(uiState.appLanguage) {
+                LocaleHelper.createLocalizedConfiguration(this@MainActivity, uiState.appLanguage)
+            }
+
+            CompositionLocalProvider(
+                LocalContext provides localizedContext,
+                LocalConfiguration provides localizedConfiguration,
+                LocalActivityResultRegistryOwner provides this@MainActivity
+            ) {
+                TrustifyTheme(themeMode = uiState.themeMode) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        TrustifyApp(
+                            viewModel = viewModel,
+                            initialPhoneNumber = initialPhoneNumber,
+                            onLanguageChanged = { lang ->
+                                viewModel.setLanguage(lang, this@MainActivity)
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -79,22 +112,33 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-sealed class BottomNavItem(val screen: Screen, val icon: ImageVector, val label: String) {
-    object Dashboard : BottomNavItem(Screen.Dashboard, Icons.Default.Shield, "Home")
-    object Activity : BottomNavItem(Screen.Activity, Icons.Default.History, "Activity")
-    object Trusted : BottomNavItem(Screen.Trusted, Icons.Default.Favorite, "Trusted")
-    object Report : BottomNavItem(Screen.Report, Icons.Default.Flag, "Report")
-    object Settings : BottomNavItem(Screen.Settings, Icons.Default.Settings, "Settings")
+sealed class BottomNavItem(
+    val screen: Screen,
+    val icon: ImageVector,
+    @StringRes val labelRes: Int
+) {
+    object Dashboard : BottomNavItem(Screen.Dashboard, Icons.Default.Shield, R.string.nav_home)
+    object Activity : BottomNavItem(Screen.Activity, Icons.Default.History, R.string.nav_activity)
+    object Trusted : BottomNavItem(Screen.Trusted, Icons.Default.Favorite, R.string.nav_trusted)
+    object Report : BottomNavItem(Screen.Report, Icons.Default.Flag, R.string.nav_report)
+    object Settings : BottomNavItem(Screen.Settings, Icons.Default.Settings, R.string.nav_settings)
 }
 
 @Composable
-fun SafeCallApp(
+fun TrustifyApp(
     viewModel: SafeCallViewModel,
-    initialPhoneNumber: String?
+    initialPhoneNumber: String?,
+    onLanguageChanged: (com.safecallai.app.data.local.AppLanguage) -> Unit
 ) {
     val navController = rememberNavController()
     val preferences = viewModel.getRepository().preferences
-    val startDestination = if (preferences.hasCompletedOnboarding) Screen.Dashboard.route else Screen.Onboarding.route
+    val uiState by viewModel.uiState.collectAsState()
+
+    val startDestination = when {
+        !preferences.hasSelectedLanguage -> Screen.LanguageSelection.route
+        !preferences.hasCompletedOnboarding -> Screen.Onboarding.route
+        else -> Screen.Dashboard.route
+    }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -110,7 +154,6 @@ fun SafeCallApp(
         BottomNavItem.Dashboard,
         BottomNavItem.Activity,
         BottomNavItem.Trusted,
-        BottomNavItem.Report,
         BottomNavItem.Settings
     )
 
@@ -125,6 +168,7 @@ fun SafeCallApp(
                 ) {
                     bottomNavItems.forEach { item ->
                         val selected = currentRoute == item.screen.route
+                        val labelText = stringResource(item.labelRes)
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
@@ -140,11 +184,11 @@ fun SafeCallApp(
                             icon = {
                                 Icon(
                                     imageVector = item.icon,
-                                    contentDescription = item.label,
+                                    contentDescription = labelText,
                                     tint = if (selected) BrandBlue else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             },
-                            label = { Text(item.label) },
+                            label = { Text(labelText) },
                             colors = NavigationBarItemDefaults.colors(
                                 indicatorColor = BrandBlue.copy(alpha = 0.15f)
                             )
@@ -159,6 +203,23 @@ fun SafeCallApp(
             startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable(Screen.LanguageSelection.route) {
+                LanguageSelectionScreen(
+                    currentLanguage = uiState.appLanguage,
+                    onLanguageSelected = { lang ->
+                        onLanguageChanged(lang)
+                        val nextRoute = if (preferences.hasCompletedOnboarding) {
+                            Screen.Dashboard.route
+                        } else {
+                            Screen.Onboarding.route
+                        }
+                        navController.navigate(nextRoute) {
+                            popUpTo(Screen.LanguageSelection.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
             composable(Screen.Onboarding.route) {
                 OnboardingScreen(
                     viewModel = viewModel,

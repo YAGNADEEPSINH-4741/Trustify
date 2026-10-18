@@ -18,7 +18,7 @@ data class ClassificationResult(
     val category: String? = null,
     val evidenceList: List<Evidence> = emptyList(),
     val warnings: List<Warning> = emptyList(),
-    val dataSource: String = "SafeCall AI Local Engine",
+    val dataSource: String = "Trustify Local Engine",
     val lastVerifiedTimestamp: Long? = null,
     val explanation: String,
     val isSafeToRingNormally: Boolean = true,

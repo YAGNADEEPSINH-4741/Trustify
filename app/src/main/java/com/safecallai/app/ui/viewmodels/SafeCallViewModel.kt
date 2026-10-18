@@ -19,6 +19,7 @@ data class DashboardUiState(
     val isRoleHeld: Boolean = false,
     val isDefaultDialer: Boolean = false,
     val themeMode: com.safecallai.app.data.local.PreferencesManager.ThemeMode = com.safecallai.app.data.local.PreferencesManager.ThemeMode.SYSTEM_DEFAULT,
+    val appLanguage: com.safecallai.app.data.local.AppLanguage = com.safecallai.app.data.local.AppLanguage.ENGLISH,
     val totalScreenedCount: Int = 0,
     val falseSpamRecoveredCount: Int = 0,
     val verifiedCount: Int = 0,
@@ -43,7 +44,10 @@ class SafeCallViewModel(application: Application) : AndroidViewModel(application
     private val defaultDialerManager = com.safecallai.app.service.DefaultDialerManager(application)
 
     private val _uiState = MutableStateFlow(
-        DashboardUiState(themeMode = repository.preferences.themeMode)
+        DashboardUiState(
+            themeMode = repository.preferences.themeMode,
+            appLanguage = repository.preferences.appLanguage
+        )
     )
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
@@ -63,6 +67,7 @@ class SafeCallViewModel(application: Application) : AndroidViewModel(application
                 isRoleHeld = roleHeld,
                 isDefaultDialer = isDefaultDialer,
                 themeMode = repository.preferences.themeMode,
+                appLanguage = repository.preferences.appLanguage,
                 totalScreenedCount = stats.first,
                 falseSpamRecoveredCount = stats.second,
                 verifiedCount = stats.third,
@@ -87,6 +92,14 @@ class SafeCallViewModel(application: Application) : AndroidViewModel(application
     fun setThemeMode(mode: com.safecallai.app.data.local.PreferencesManager.ThemeMode) {
         repository.preferences.themeMode = mode
         _uiState.value = _uiState.value.copy(themeMode = mode)
+    }
+
+    fun setLanguage(language: com.safecallai.app.data.local.AppLanguage, context: android.content.Context) {
+        repository.preferences.appLanguage = language
+        repository.preferences.hasSelectedLanguage = true
+        com.safecallai.app.util.LocaleHelper.applyLanguage(context, language)
+        _uiState.value = _uiState.value.copy(appLanguage = language)
+        refreshState()
     }
 
     fun evaluateNumber(rawNumber: String) {
@@ -159,13 +172,13 @@ class SafeCallViewModel(application: Application) : AndroidViewModel(application
                 onSuccess = {
                     _uiState.value = _uiState.value.copy(
                         isSubmittingReport = false,
-                        reportSuccessMessage = "Report submitted successfully! Thank you for improving false spam detection."
+                        reportSuccessMessage = "Report saved locally on your device. Thank you for helping refine false spam detection."
                     )
                 },
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isSubmittingReport = false,
-                        reportErrorMessage = error.message ?: "Failed to submit report. Stored locally."
+                        reportErrorMessage = error.message ?: "Failed to save report locally."
                     )
                 }
             )
@@ -179,9 +192,11 @@ class SafeCallViewModel(application: Application) : AndroidViewModel(application
         )
     }
 
-    fun updateSupabaseConfig(url: String, key: String) {
-        repository.preferences.supabaseUrl = url
-        repository.preferences.supabaseAnonKey = key
+    fun purgeAllLocalData() {
+        viewModelScope.launch {
+            repository.clearAllLocalData()
+            refreshState()
+        }
     }
 
     fun completeOnboarding() {

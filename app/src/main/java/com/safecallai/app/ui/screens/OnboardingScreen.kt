@@ -43,6 +43,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
+import com.safecallai.app.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.safecallai.app.ui.theme.BrandBlue
@@ -118,18 +120,29 @@ fun OnboardingContent(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "SafeCall AI",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Bold
+            text = stringResource(R.string.app_name),
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = (-0.5).sp
+            ),
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Text(
-            text = "AI-Powered False Spam Recovery & Caller Identification",
-            style = MaterialTheme.typography.bodyMedium,
+            text = stringResource(R.string.app_tagline),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = BrandBlue,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+
+        Text(
+            text = stringResource(R.string.app_project_title),
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 6.dp)
+            modifier = Modifier.padding(top = 4.dp)
         )
 
         Spacer(modifier = Modifier.height(28.dp))
@@ -150,14 +163,14 @@ fun OnboardingContent(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "The False Spam Dilemma",
+                        text = stringResource(R.string.onboarding_false_spam_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Delivery partners, cab drivers, and recruiters call dozens of people daily. Other apps blindly mark them as spam, causing you to miss crucial packages and rides.\n\nSafeCall AI cross-verifies active booking dispatches to recover legitimate callers without compromising your safety.",
+                    text = stringResource(R.string.onboarding_false_spam_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -182,14 +195,14 @@ fun OnboardingContent(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Privacy First",
+                        text = stringResource(R.string.onboarding_privacy_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "• No contact list uploading or scraping\n• No call audio recording or eavesdropping\n• Core rules-based engine runs 100% offline\n• Independent evidence is separated from assumptions",
+                    text = stringResource(R.string.onboarding_privacy_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -214,13 +227,16 @@ fun OnboardingContent(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Call Screening Service",
+                            text = stringResource(R.string.onboarding_screening_service),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = if (isRoleHeld) "Active: Selected as Call Screening App" else "Permission needed to evaluate incoming calls",
+                            text = if (isRoleHeld)
+                                stringResource(R.string.onboarding_screening_active)
+                            else
+                                stringResource(R.string.onboarding_screening_permission_needed),
                             style = MaterialTheme.typography.bodySmall,
                             color = if (isRoleHeld) LegitGreen else MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -242,7 +258,7 @@ fun OnboardingContent(
                         onClick = onRequestRole,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Grant Call Screening Role")
+                        Text(stringResource(R.string.onboarding_grant_role))
                     }
                 }
             }
@@ -259,7 +275,7 @@ fun OnboardingContent(
                 .height(52.dp)
         ) {
             Text(
-                text = "Continue to Dashboard",
+                text = stringResource(R.string.onboarding_continue_btn),
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp
             )

@@ -51,7 +51,7 @@ class SafeCallInCallService : InCallService() {
         val contactInfo = ContactLookupHelper.lookupContact(this, rawNumber)
 
         // 1. Immediately bind real call & launch UI so audio & telephony are never blocked by network latency
-        CallManager.bindRealCall(call, rawNumber, contactInfo, null, this)
+        CallManager.bindRealCall(call, rawNumber, contactInfo, null, null, this)
 
         val intent = Intent(this, IncomingCallActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -60,14 +60,16 @@ class SafeCallInCallService : InCallService() {
         }
         startActivity(intent)
 
-        // 2. Perform background classification and update UI asynchronously when results are ready
+        // 2. Perform background identification and classification, updating UI asynchronously
         val app = applicationContext as? SafeCallApplication
         val repository = app?.repository
         if (repository != null) {
             serviceScope.launch(Dispatchers.IO) {
                 try {
-                    val classificationResult = repository.screenAndClassify(rawNumber, recordInHistory = true)
+                    val identityResult = repository.identifyCaller(rawNumber, call.details, allowNetworkQuery = true)
+                    val classificationResult = repository.screenAndClassify(rawNumber, recordInHistory = true, telecomDetails = call.details)
                     serviceScope.launch(Dispatchers.Main) {
+                        CallManager.updateCallerIdentity(identityResult)
                         CallManager.updateClassification(classificationResult)
                     }
                 } catch (_: Exception) {

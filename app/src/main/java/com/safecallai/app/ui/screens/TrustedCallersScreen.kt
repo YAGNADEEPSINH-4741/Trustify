@@ -47,9 +47,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.safecallai.app.R
 import com.safecallai.app.domain.engine.PhoneNumberNormalizer
 import com.safecallai.app.domain.models.UserTrustedCaller
 import com.safecallai.app.ui.theme.BrandBlue
@@ -91,18 +93,18 @@ fun TrustedCallersScreenContent(
     if (showAddDialog) {
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
-            title = { Text("Add Personal Trusted Caller") },
+            title = { Text(stringResource(R.string.trusted_add_dialog_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "Adding a number to your personal trusted list will whitelist calls on your device only. It does not mark the caller as a verified public business.",
+                        text = stringResource(R.string.trusted_add_dialog_desc),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     OutlinedTextField(
                         value = inputPhone,
                         onValueChange = { inputPhone = it },
-                        label = { Text("Phone Number") },
+                        label = { Text(stringResource(R.string.trusted_phone_label)) },
                         placeholder = { Text("e.g. +91 98765 43210") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
@@ -110,15 +112,15 @@ fun TrustedCallersScreenContent(
                     OutlinedTextField(
                         value = inputLabel,
                         onValueChange = { inputLabel = it },
-                        label = { Text("Contact Name / Label") },
-                        placeholder = { Text("e.g. Building Security, Clinic") },
+                        label = { Text(stringResource(R.string.trusted_contact_name_label)) },
+                        placeholder = { Text(stringResource(R.string.trusted_contact_placeholder)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
                         value = inputNotes,
                         onValueChange = { inputNotes = it },
-                        label = { Text("Notes (Optional)") },
+                        label = { Text(stringResource(R.string.trusted_notes_label)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -137,12 +139,12 @@ fun TrustedCallersScreenContent(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = BrandBlue)
                 ) {
-                    Text("Save")
+                    Text(stringResource(R.string.btn_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.btn_cancel))
                 }
             }
         )
@@ -151,7 +153,7 @@ fun TrustedCallersScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Trusted Callers", fontWeight = FontWeight.SemiBold) },
+                title = { Text(stringResource(R.string.trusted_title), fontWeight = FontWeight.SemiBold) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
@@ -163,7 +165,7 @@ fun TrustedCallersScreenContent(
                 containerColor = BrandBlue,
                 contentColor = androidx.compose.ui.graphics.Color.White
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Trusted Caller")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.trusted_add_btn))
             }
         }
     ) { padding ->
@@ -194,7 +196,7 @@ fun TrustedCallersScreenContent(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Personal trust is stored strictly on your device. It never automatically marks an unverified caller as a verified public business for other users.",
+                        text = stringResource(R.string.trusted_principle_notice),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -219,12 +221,12 @@ fun TrustedCallersScreenContent(
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "No Trusted Callers Added",
+                            text = stringResource(R.string.trusted_empty_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = "Add frequently called local service providers, apartment gates, or technicians to ensure their calls always ring normally.",
+                            text = stringResource(R.string.trusted_empty_desc),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -262,7 +264,7 @@ fun TrustedCallersScreenContent(
 )
 @Composable
 fun PreviewTrustedCallersDark() {
-    com.safecallai.app.ui.theme.SafeCallAITheme(darkTheme = true) {
+    com.safecallai.app.ui.theme.TrustifyTheme(darkTheme = true) {
         TrustedCallersScreenContent(
             trustedCallers = listOf(
                 UserTrustedCaller(
@@ -298,7 +300,7 @@ fun PreviewTrustedCallersDark() {
 )
 @Composable
 fun PreviewTrustedCallersLight() {
-    com.safecallai.app.ui.theme.SafeCallAITheme(darkTheme = false) {
+    com.safecallai.app.ui.theme.TrustifyTheme(darkTheme = false) {
         TrustedCallersScreenContent(
             trustedCallers = listOf(
                 UserTrustedCaller(
@@ -386,7 +388,7 @@ private fun TrustedCallerCard(
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(R.string.btn_delete),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

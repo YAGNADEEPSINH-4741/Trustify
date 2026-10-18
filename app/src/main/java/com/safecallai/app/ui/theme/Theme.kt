@@ -46,7 +46,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun SafeCallAITheme(
+fun TrustifyTheme(
     themeMode: PreferencesManager.ThemeMode = PreferencesManager.ThemeMode.SYSTEM_DEFAULT,
     darkTheme: Boolean = when (themeMode) {
         PreferencesManager.ThemeMode.LIGHT -> false
@@ -74,6 +74,26 @@ fun SafeCallAITheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
+        content = content
+    )
+}
+
+/**
+ * Backward compatibility alias for TrustifyTheme.
+ */
+@Composable
+fun SafeCallAITheme(
+    themeMode: PreferencesManager.ThemeMode = PreferencesManager.ThemeMode.SYSTEM_DEFAULT,
+    darkTheme: Boolean = when (themeMode) {
+        PreferencesManager.ThemeMode.LIGHT -> false
+        PreferencesManager.ThemeMode.DARK -> true
+        PreferencesManager.ThemeMode.SYSTEM_DEFAULT -> isSystemInDarkTheme()
+    },
+    content: @Composable () -> Unit
+) {
+    TrustifyTheme(
+        themeMode = themeMode,
+        darkTheme = darkTheme,
         content = content
     )
 }

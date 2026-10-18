@@ -113,15 +113,26 @@ class LocalCallHistoryRepository(private val dbHelper: SafeCallDatabaseHelper) {
             while (it.moveToNext()) {
                 val classificationStr = it.getString(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_CLASSIFICATION))
                 val statusStr = it.getString(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_VERIFICATION_STATUS))
+                val phone = it.getString(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_PHONE))
+                val rawCallerName = it.getString(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_CALLER_NAME))
+
+                // Resolve saved contact name from device contacts provider if available
+                val contactInfo = com.safecallai.app.domain.engine.ContactLookupHelper.lookupContact(dbHelper.context, phone)
+                val effectiveCallerName = if (contactInfo.isSavedContact && !contactInfo.name.isNullOrBlank()) {
+                    contactInfo.name
+                } else {
+                    rawCallerName
+                }
+
                 list.add(
                     ScreenedCallRecord(
                         id = it.getLong(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_ID)),
-                        phoneNumber = it.getString(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_PHONE)),
+                        phoneNumber = phone,
                         normalizedPhoneNumber = it.getString(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_NORMALIZED)),
                         timestamp = it.getLong(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_TIMESTAMP)),
                         classification = try { CallerClassification.valueOf(classificationStr) } catch (_: Exception) { CallerClassification.UNKNOWN },
                         verificationStatus = try { VerificationStatus.valueOf(statusStr) } catch (_: Exception) { VerificationStatus.UNVERIFIED },
-                        callerName = it.getString(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_CALLER_NAME)),
+                        callerName = effectiveCallerName,
                         reason = it.getString(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_REASON)),
                         wasSilenced = it.getInt(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_WAS_SILENCED)) == 1,
                         falseSpamRecovered = it.getInt(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_FALSE_SPAM)) == 1
@@ -234,5 +245,64 @@ class LocalBusinessCacheRepository(private val dbHelper: SafeCallDatabaseHelper)
     suspend fun clearCache(): Boolean = withContext(Dispatchers.IO) {
         val db = dbHelper.writableDatabase
         db.delete(SafeCallDatabaseHelper.TABLE_CACHE, null, null) >= 0
+    }
+}
+
+data class LocalReportDraft(
+    val id: Long = 0,
+    val phoneNumber: String,
+    val normalizedPhoneNumber: String,
+    val category: String,
+    val description: String,
+    val timestamp: Long = System.currentTimeMillis()
+)
+
+class LocalReportRepository(private val dbHelper: SafeCallDatabaseHelper) {
+
+    suspend fun saveReport(
+        phoneNumber: String,
+        normalizedPhoneNumber: String,
+        category: String,
+        description: String
+    ): Long = withContext(Dispatchers.IO) {
+        val db = dbHelper.writableDatabase
+        val values = ContentValues().apply {
+            put(SafeCallDatabaseHelper.COL_PHONE, phoneNumber)
+            put(SafeCallDatabaseHelper.COL_NORMALIZED, normalizedPhoneNumber)
+            put(SafeCallDatabaseHelper.COL_REPORT_CATEGORY, category)
+            put(SafeCallDatabaseHelper.COL_REPORT_DESC, description)
+            put(SafeCallDatabaseHelper.COL_TIMESTAMP, System.currentTimeMillis())
+        }
+        db.insert(SafeCallDatabaseHelper.TABLE_REPORTS, null, values)
+    }
+
+    suspend fun getAllReports(): List<LocalReportDraft> = withContext(Dispatchers.IO) {
+        val list = mutableListOf<LocalReportDraft>()
+        val db = dbHelper.readableDatabase
+        val cursor = db.query(
+            SafeCallDatabaseHelper.TABLE_REPORTS,
+            null, null, null, null, null,
+            "${SafeCallDatabaseHelper.COL_TIMESTAMP} DESC"
+        )
+        cursor.use {
+            while (it.moveToNext()) {
+                list.add(
+                    LocalReportDraft(
+                        id = it.getLong(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_ID)),
+                        phoneNumber = it.getString(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_PHONE)),
+                        normalizedPhoneNumber = it.getString(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_NORMALIZED)),
+                        category = it.getString(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_REPORT_CATEGORY)),
+                        description = it.getString(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_REPORT_DESC)),
+                        timestamp = it.getLong(it.getColumnIndexOrThrow(SafeCallDatabaseHelper.COL_TIMESTAMP))
+                    )
+                )
+            }
+        }
+        list
+    }
+
+    suspend fun clearReports(): Boolean = withContext(Dispatchers.IO) {
+        val db = dbHelper.writableDatabase
+        db.delete(SafeCallDatabaseHelper.TABLE_REPORTS, null, null) >= 0
     }
 }

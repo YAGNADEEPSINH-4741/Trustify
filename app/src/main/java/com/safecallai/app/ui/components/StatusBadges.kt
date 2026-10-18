@@ -22,9 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.safecallai.app.R
 import com.safecallai.app.domain.models.CallerClassification
 import com.safecallai.app.domain.models.VerificationStatus
 import com.safecallai.app.ui.theme.HighRiskRed
@@ -43,36 +45,36 @@ fun ClassificationBadge(
     classification: CallerClassification,
     modifier: Modifier = Modifier
 ) {
-    val (bgColor, fgColor, icon, text) = when (classification) {
+    val (bgColor, fgColor, icon, textRes) = when (classification) {
         CallerClassification.VERIFIED_LEGITIMATE -> Quad(
             LegitGreenContainer,
             LegitGreen,
             Icons.Default.CheckCircle,
-            "VERIFIED LEGITIMATE"
+            R.string.badge_verified_legitimate
         )
         CallerClassification.LIKELY_LEGITIMATE -> Quad(
             LikelyLegitContainer,
             LikelyLegitTeal,
             Icons.Default.Shield,
-            "LIKELY LEGITIMATE"
+            R.string.badge_likely_legitimate
         )
         CallerClassification.UNKNOWN -> Quad(
             UnknownGrayContainer,
             Color(0xFFCBD5E1),
             Icons.Default.Help,
-            "UNKNOWN CALLER"
+            R.string.badge_unknown
         )
         CallerClassification.POTENTIAL_SPAM -> Quad(
             SpamAmberContainer,
             SpamAmber,
             Icons.Default.Warning,
-            "POTENTIAL SPAM"
+            R.string.badge_potential_spam
         )
         CallerClassification.HIGH_RISK -> Quad(
             HighRiskRedContainer,
             HighRiskRed,
             Icons.Default.Warning,
-            "HIGH-RISK ALERT"
+            R.string.badge_high_risk
         )
     }
 
@@ -91,7 +93,7 @@ fun ClassificationBadge(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = text,
+                text = stringResource(textRes),
                 color = fgColor,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
@@ -106,14 +108,14 @@ fun VerificationStatusChip(
     status: VerificationStatus,
     modifier: Modifier = Modifier
 ) {
-    val label = when (status) {
-        VerificationStatus.VERIFIED_BUSINESS -> "Corporate Registered"
-        VerificationStatus.ACTIVE_BOOKING_ASSOCIATED -> "Active Dispatch Linked"
-        VerificationStatus.USER_TRUSTED -> "Personal Trust"
-        VerificationStatus.COMMUNITY_REPUTATION -> "Community Reports"
-        VerificationStatus.UNVERIFIED -> "Unverified"
-        VerificationStatus.EXPIRED -> "Expired Registry"
-        VerificationStatus.CONFLICTING_SIGNALS -> "Conflicting Signals"
+    val textRes = when (status) {
+        VerificationStatus.VERIFIED_BUSINESS -> R.string.status_corporate_registered
+        VerificationStatus.ACTIVE_BOOKING_ASSOCIATED -> R.string.status_active_dispatch
+        VerificationStatus.USER_TRUSTED -> R.string.status_user_trusted
+        VerificationStatus.COMMUNITY_REPUTATION -> R.string.status_community_reports
+        VerificationStatus.UNVERIFIED -> R.string.status_unverified
+        VerificationStatus.EXPIRED -> R.string.status_expired
+        VerificationStatus.CONFLICTING_SIGNALS -> R.string.status_conflicting_signals
     }
 
     Box(
@@ -123,7 +125,7 @@ fun VerificationStatusChip(
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Text(
-            text = label,
+            text = stringResource(textRes),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium

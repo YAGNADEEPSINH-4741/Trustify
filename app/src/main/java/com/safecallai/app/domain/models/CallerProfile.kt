@@ -50,6 +50,15 @@ enum class ReportCategory {
     INCORRECT_BUSINESS_IDENTITY,
     OTHER;
 
+    val labelRes: Int
+        get() = when (this) {
+            INCORRECT_SPAM_CLASSIFICATION -> com.safecallai.app.R.string.report_category_incorrect_spam
+            SUSPECTED_SPAM -> com.safecallai.app.R.string.report_category_robocall
+            SUSPECTED_IMPERSONATION -> com.safecallai.app.R.string.report_category_impersonation
+            INCORRECT_BUSINESS_IDENTITY -> com.safecallai.app.R.string.report_category_telemarketing
+            OTHER -> com.safecallai.app.R.string.report_category_fraud
+        }
+
     val displayName: String
         get() = when (this) {
             INCORRECT_SPAM_CLASSIFICATION -> "False Spam (Caller is Legitimate)"

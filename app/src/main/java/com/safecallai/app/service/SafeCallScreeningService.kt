@@ -42,7 +42,7 @@ class SafeCallScreeningService : CallScreeningService() {
             try {
                 // Perform multi-signal evidence classification with a strict 4-second timeout guarantee
                 val result = kotlinx.coroutines.withTimeoutOrNull(4000L) {
-                    repository.screenAndClassify(rawNumber, recordInHistory = true)
+                    repository.screenAndClassify(rawNumber, recordInHistory = true, telecomDetails = callDetails)
                 }
 
                 if (result == null) {

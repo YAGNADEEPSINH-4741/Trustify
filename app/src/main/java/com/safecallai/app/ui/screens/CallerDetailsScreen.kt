@@ -57,12 +57,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.safecallai.app.R
 import com.safecallai.app.domain.engine.PhoneNumberNormalizer
 import com.safecallai.app.domain.models.CallerClassification
 import com.safecallai.app.domain.models.ClassificationResult
@@ -98,6 +100,8 @@ fun CallerDetailsScreen(
     var loadedResult by remember { mutableStateOf<ClassificationResult?>(null) }
     var isLoading by remember { mutableStateOf(true) }
 
+    val defaultContactName = stringResource(R.string.trusted_default_contact_name)
+
     LaunchedEffect(phoneNumber) {
         isLoading = true
         val repo = viewModel.getRepository()
@@ -128,7 +132,7 @@ fun CallerDetailsScreen(
                         }
                         isTrusted = false
                     } else {
-                        repo.addTrustedCaller(loadedResult!!.rawNumber, loadedResult!!.callerName ?: "Personal Contact")
+                        repo.addTrustedCaller(loadedResult!!.rawNumber, loadedResult!!.callerName ?: defaultContactName)
                         isTrusted = true
                     }
                     viewModel.refreshState()
@@ -156,10 +160,10 @@ fun CallerDetailsContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Caller Evidence", fontWeight = FontWeight.SemiBold) },
+                title = { Text(stringResource(R.string.caller_details_evidence_title), fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.btn_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -188,7 +192,7 @@ fun CallerDetailsContent(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = result.callerName ?: result.businessName ?: "Unverified Caller",
+                        text = result.callerName ?: result.businessName ?: stringResource(R.string.caller_details_unverified),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -206,7 +210,7 @@ fun CallerDetailsContent(
                         ) {
                             Icon(
                                 Icons.Default.ContentCopy,
-                                contentDescription = "Copy",
+                                contentDescription = stringResource(R.string.cd_copy),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -227,7 +231,7 @@ fun CallerDetailsContent(
                                 .padding(horizontal = 14.dp, vertical = 6.dp)
                         ) {
                             Text(
-                                text = "★ FALSE SPAM RECOVERED",
+                                text = stringResource(R.string.subtitle_false_spam_recovered),
                                 color = LegitGreen,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
@@ -253,7 +257,7 @@ fun CallerDetailsContent(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Analysis & Explanation",
+                            text = stringResource(R.string.caller_details_analysis_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -266,7 +270,7 @@ fun CallerDetailsContent(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Data Source: ${result.dataSource}",
+                        text = stringResource(R.string.caller_details_data_source, result.dataSource),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -281,12 +285,12 @@ fun CallerDetailsContent(
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text(
-                        text = "Supporting Evidence Ledger",
+                        text = stringResource(R.string.caller_details_evidence_ledger),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "Independently verified records vs user expectations",
+                        text = stringResource(R.string.caller_details_evidence_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -294,7 +298,7 @@ fun CallerDetailsContent(
 
                     if (result.evidenceList.isEmpty()) {
                         Text(
-                            text = "No independent verification records found for this number.",
+                            text = stringResource(R.string.caller_details_no_evidence),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -324,7 +328,7 @@ fun CallerDetailsContent(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Active Cautions & Warnings",
+                                text = stringResource(R.string.caller_details_cautions_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -347,7 +351,7 @@ fun CallerDetailsContent(
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text(
-                        text = "Actions",
+                        text = stringResource(R.string.caller_details_actions_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -369,7 +373,7 @@ fun CallerDetailsContent(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (isTrusted) "Remove from Trusted List" else "Mark as Personal Trusted Caller",
+                            text = if (isTrusted) stringResource(R.string.caller_details_remove_trusted) else stringResource(R.string.caller_details_mark_trusted),
                             color = if (isTrusted) MaterialTheme.colorScheme.onSurface else Color.White
                         )
                     }
@@ -384,7 +388,7 @@ fun CallerDetailsContent(
                     ) {
                         Icon(Icons.Default.Flag, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Report False Spam or Suspicious Activity")
+                        Text(stringResource(R.string.caller_details_report_action))
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
@@ -402,7 +406,7 @@ fun CallerDetailsContent(
                     ) {
                         Icon(Icons.Default.Call, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Call via Phone Dialer")
+                        Text(stringResource(R.string.caller_details_call_dialer))
                     }
                 }
             }
@@ -416,6 +420,11 @@ fun CallerDetailsContent(
 private fun EvidenceItemRow(evidence: Evidence) {
     val dateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
     val formattedDate = remember(evidence.timestamp) { dateFormat.format(Date(evidence.timestamp)) }
+    val verifiedLabel = if (evidence.isIndependent) {
+        stringResource(R.string.caller_details_independently_verified)
+    } else {
+        stringResource(R.string.caller_details_user_stated)
+    }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -442,7 +451,7 @@ private fun EvidenceItemRow(evidence: Evidence) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "Source: ${evidence.source} • Verified: $formattedDate • ${if (evidence.isIndependent) "Independently Verified" else "User Stated"}",
+                text = stringResource(R.string.caller_details_evidence_format, evidence.source, formattedDate, verifiedLabel),
                 fontSize = 10.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                 modifier = Modifier.padding(top = 2.dp)
@@ -491,7 +500,7 @@ private fun WarningItemRow(warning: Warning) {
 @Preview(name = "Caller Details - Dark Theme", showBackground = true, showSystemUi = true, device = Devices.PIXEL_7)
 @Composable
 fun CallerDetailsDarkPreview() {
-    SafeCallAITheme(darkTheme = true) {
+    com.safecallai.app.ui.theme.TrustifyTheme(darkTheme = true) {
         CallerDetailsContent(
             result = ClassificationResult(
                 rawNumber = "+919876543210",
@@ -523,7 +532,7 @@ fun CallerDetailsDarkPreview() {
 @Preview(name = "Caller Details - Light Theme", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true, showSystemUi = true, device = Devices.PIXEL_7)
 @Composable
 fun CallerDetailsLightPreview() {
-    SafeCallAITheme(darkTheme = false) {
+    com.safecallai.app.ui.theme.TrustifyTheme(darkTheme = false) {
         CallerDetailsContent(
             result = ClassificationResult(
                 rawNumber = "+9118002026161",

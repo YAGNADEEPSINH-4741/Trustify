@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -39,8 +40,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.safecallai.app.R
 import com.safecallai.app.domain.models.CallerClassification
 import com.safecallai.app.ui.theme.BrandBlue
 import com.safecallai.app.ui.theme.HighRiskRed
@@ -85,8 +88,8 @@ fun RecentActivityScreenContent(
     if (showClearConfirmDialog) {
         AlertDialog(
             onDismissRequest = { showClearConfirmDialog = false },
-            title = { Text("Clear Screening History?") },
-            text = { Text("This will delete all locally stored records of screened calls. This action cannot be undone.") },
+            title = { Text(stringResource(R.string.activity_clear_dialog_title)) },
+            text = { Text(stringResource(R.string.activity_clear_dialog_desc)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -94,12 +97,12 @@ fun RecentActivityScreenContent(
                         showClearConfirmDialog = false
                     }
                 ) {
-                    Text("Clear All", color = HighRiskRed, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.activity_clear_confirm), color = HighRiskRed, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showClearConfirmDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.btn_cancel))
                 }
             }
         )
@@ -108,11 +111,11 @@ fun RecentActivityScreenContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Screening Activity", fontWeight = FontWeight.SemiBold) },
+                title = { Text(stringResource(R.string.activity_title), fontWeight = FontWeight.SemiBold) },
                 actions = {
                     if (recentCalls.isNotEmpty()) {
                         IconButton(onClick = { showClearConfirmDialog = true }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Clear History")
+                            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.activity_clear_history))
                         }
                     }
                 },
@@ -138,7 +141,7 @@ fun RecentActivityScreenContent(
                     FilterChip(
                         selected = selectedFilter == "ALL",
                         onClick = { selectedFilter = "ALL" },
-                        label = { Text("All (${recentCalls.size})") },
+                        label = { Text(stringResource(R.string.activity_filter_all_count, recentCalls.size)) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = BrandBlue.copy(alpha = 0.2f),
                             selectedLabelColor = BrandBlue
@@ -149,28 +152,61 @@ fun RecentActivityScreenContent(
                     FilterChip(
                         selected = selectedFilter == "FALSE_SPAM",
                         onClick = { selectedFilter = "FALSE_SPAM" },
-                        label = { Text("False Spam Recovered ($falseSpamRecoveredCount)") }
+                        label = { Text(stringResource(R.string.activity_filter_false_spam_count, falseSpamRecoveredCount)) }
                     )
                 }
                 item {
                     FilterChip(
                         selected = selectedFilter == "VERIFIED",
                         onClick = { selectedFilter = "VERIFIED" },
-                        label = { Text("Verified ($verifiedCount)") }
+                        label = { Text(stringResource(R.string.activity_filter_verified_count, verifiedCount)) }
                     )
                 }
                 item {
                     FilterChip(
                         selected = selectedFilter == "POTENTIAL_SPAM",
                         onClick = { selectedFilter = "POTENTIAL_SPAM" },
-                        label = { Text("Spam / High-Risk") }
+                        label = { Text(stringResource(R.string.activity_filter_spam_risk)) }
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (filteredCalls.isEmpty()) {
+            if (recentCalls.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = stringResource(R.string.activity_empty_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = stringResource(R.string.activity_empty_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                }
+            } else if (filteredCalls.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -178,7 +214,7 @@ fun RecentActivityScreenContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No records match the selected filter.",
+                        text = stringResource(R.string.activity_no_matching_filter),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -189,7 +225,7 @@ fun RecentActivityScreenContent(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(filteredCalls) { record ->
-                        RecentCallItem(
+                        RecentCallRowItem(
                             record = record,
                             onClick = { onNavigateToCallerDetails(record.phoneNumber) }
                         )
@@ -212,7 +248,7 @@ fun RecentActivityScreenContent(
 )
 @Composable
 fun PreviewRecentActivityDark() {
-    com.safecallai.app.ui.theme.SafeCallAITheme(darkTheme = true) {
+    com.safecallai.app.ui.theme.TrustifyTheme(darkTheme = true) {
         RecentActivityScreenContent(
             recentCalls = listOf(
                 com.safecallai.app.domain.models.ScreenedCallRecord(
@@ -257,7 +293,7 @@ fun PreviewRecentActivityDark() {
 )
 @Composable
 fun PreviewRecentActivityLight() {
-    com.safecallai.app.ui.theme.SafeCallAITheme(darkTheme = false) {
+    com.safecallai.app.ui.theme.TrustifyTheme(darkTheme = false) {
         RecentActivityScreenContent(
             recentCalls = listOf(
                 com.safecallai.app.domain.models.ScreenedCallRecord(
