@@ -88,3 +88,32 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
+
+tasks.register<JavaExec>("runUnitTests") {
+    dependsOn("compileDebugUnitTestKotlin")
+    mainClass.set("org.junit.runner.JUnitCore")
+    val buildDir = layout.buildDirectory.asFile.get()
+    classpath = files(
+        android.bootClasspath,
+        file("$buildDir/tmp/kotlin-classes/debugUnitTest"),
+        file("$buildDir/tmp/kotlin-classes/debug"),
+        configurations.getByName("debugUnitTestRuntimeClasspath")
+    )
+    args = listOf(
+        "com.safecallai.app.MultiCallConferenceTest",
+        "com.safecallai.app.CallManagerTest",
+        "com.safecallai.app.PhoneNumberNormalizerTest",
+        "com.safecallai.app.QuickReplyManagerTest",
+        "com.safecallai.app.CallClassificationEngineTest",
+        "com.safecallai.app.CallerIdentificationEngineTest",
+        "com.safecallai.app.CommunityReputationTest",
+        "com.safecallai.app.LocalizationTest",
+        "com.safecallai.app.OsmBusinessDirectoryProviderTest",
+        "com.safecallai.app.TelecomCnapExtractorTest",
+        "com.safecallai.app.ThemeModeTest",
+        "com.safecallai.app.TraiNumberSeriesClassifierTest",
+        "com.safecallai.app.TrustifyLocalEngineTest",
+        "com.safecallai.app.CallScreeningRoleManagerTest"
+    )
+}
+

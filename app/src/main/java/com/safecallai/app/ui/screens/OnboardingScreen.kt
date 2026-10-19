@@ -26,8 +26,6 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -39,18 +37,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.res.stringResource
-import com.safecallai.app.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.safecallai.app.ui.theme.BrandBlue
+import com.safecallai.app.R
+import com.safecallai.app.ui.components.TrustifyBrandMark
+import com.safecallai.app.ui.components.TrustifyCard
+import com.safecallai.app.ui.theme.CyanAccent
+import com.safecallai.app.ui.theme.ElectricMint
 import com.safecallai.app.ui.theme.LegitGreen
-import com.safecallai.app.ui.theme.SafeCallAITheme
-import com.safecallai.app.ui.theme.Slate800
+import com.safecallai.app.ui.theme.TrustifyTheme
 import com.safecallai.app.ui.viewmodels.SafeCallViewModel
 
 @Composable
@@ -71,7 +71,11 @@ fun OnboardingScreen(
         onRequestRole = {
             val intent = viewModel.getRoleManager().createRequestRoleIntent()
             if (intent != null) {
-                roleLauncher.launch(intent)
+                try {
+                    roleLauncher.launch(intent)
+                } catch (_: Exception) {
+                    viewModel.refreshState()
+                }
             } else {
                 viewModel.refreshState()
             }
@@ -101,23 +105,10 @@ fun OnboardingContent(
     ) {
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Hero Icon
-        Box(
-            modifier = Modifier
-                .size(80.dp)
-                .clip(CircleShape)
-                .background(BrandBlue.copy(alpha = 0.15f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Security,
-                contentDescription = null,
-                tint = BrandBlue,
-                modifier = Modifier.size(44.dp)
-            )
-        }
+        // Hero Brand Mark
+        TrustifyBrandMark(size = 80.dp)
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text(
             text = stringResource(R.string.app_name),
@@ -132,7 +123,7 @@ fun OnboardingContent(
             text = stringResource(R.string.app_tagline),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
-            color = BrandBlue,
+            color = ElectricMint,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 4.dp)
         )
@@ -148,17 +139,15 @@ fun OnboardingContent(
         Spacer(modifier = Modifier.height(28.dp))
 
         // Problem Explanation Card
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        TrustifyCard(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Column(modifier = Modifier.padding(18.dp)) {
+            Column(modifier = Modifier.padding(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.VerifiedUser,
                         contentDescription = null,
-                        tint = BrandBlue,
+                        tint = CyanAccent,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -180,12 +169,10 @@ fun OnboardingContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Privacy Guarantees Card
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        TrustifyCard(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Column(modifier = Modifier.padding(18.dp)) {
+            Column(modifier = Modifier.padding(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Lock,
@@ -209,17 +196,13 @@ fun OnboardingContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // System Role Setup Card
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isRoleHeld) LegitGreen.copy(alpha = 0.12f) else Slate800
-            ),
+        TrustifyCard(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Column(modifier = Modifier.padding(18.dp)) {
+            Column(modifier = Modifier.padding(20.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -256,9 +239,10 @@ fun OnboardingContent(
                     Spacer(modifier = Modifier.height(14.dp))
                     OutlinedButton(
                         onClick = onRequestRole,
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(stringResource(R.string.onboarding_grant_role))
+                        Text(stringResource(R.string.onboarding_grant_role), color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }
@@ -268,16 +252,20 @@ fun OnboardingContent(
 
         Button(
             onClick = onContinue,
-            colors = ButtonDefaults.buttonColors(containerColor = BrandBlue),
-            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = ElectricMint,
+                contentColor = Color(0xFF070B14)
+            ),
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
         ) {
             Text(
                 text = stringResource(R.string.onboarding_continue_btn),
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = Color(0xFF070B14)
             )
         }
 
@@ -288,7 +276,7 @@ fun OnboardingContent(
 @Preview(name = "Onboarding - Dark Theme", showBackground = true, showSystemUi = true, device = Devices.PIXEL_7)
 @Composable
 fun OnboardingScreenDarkPreview() {
-    SafeCallAITheme(darkTheme = true) {
+    TrustifyTheme(darkTheme = true) {
         OnboardingContent(isRoleHeld = false, onRequestRole = {}, onContinue = {})
     }
 }
@@ -296,7 +284,7 @@ fun OnboardingScreenDarkPreview() {
 @Preview(name = "Onboarding - Light Theme", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true, showSystemUi = true, device = Devices.PIXEL_7)
 @Composable
 fun OnboardingScreenLightPreview() {
-    SafeCallAITheme(darkTheme = false) {
+    TrustifyTheme(darkTheme = false) {
         OnboardingContent(isRoleHeld = true, onRequestRole = {}, onContinue = {})
     }
 }

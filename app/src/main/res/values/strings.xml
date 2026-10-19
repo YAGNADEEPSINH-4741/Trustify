@@ -193,7 +193,7 @@
     <string name="settings_restricted_settings_desc">Sideloaded apps need Restricted Settings enabled. Tap to fix in 3 steps.</string>
     <string name="settings_restricted_fix_btn">Fix</string>
     <string name="settings_screening_role_active">Call Screening Role Active</string>
-    <string name="settings_screening_role_inactive">Call Screening Role Registered</string>
+    <string name="settings_screening_role_inactive">Call Screening Role Not Granted</string>
     <string name="settings_enable_role">Enable Role</string>
     <string name="settings_screening_role_desc">Allows Trustify to inspect incoming numbers before the phone rings and show live identification alerts.</string>
     <string name="settings_interactive_tests">Interactive Calling Screen Tests</string>
@@ -327,4 +327,27 @@
     <string name="identity_source_osm_business">Public business listing</string>
     <string name="identity_source_osm_attribution">Identity source: OpenStreetMap</string>
     <string name="identity_source_no_match">No reliable name found</string>
+
+    <!-- Multi-Call, Add Call, Swap & Conference Strings -->
+    <string name="call_add_call">Add Call</string>
+    <string name="call_add_call_subtitle">Select contact or dial an unsaved number</string>
+    <string name="call_swap_calls">Swap Calls</string>
+    <string name="call_merge_calls">Merge Calls</string>
+    <string name="call_merging">Merging…</string>
+    <string name="call_merge_unavailable_hint">Both calls must be connected to merge</string>
+    <string name="call_merge_unsupported">Conference call is not supported by your mobile network carrier. You can continue speaking and switch using Swap Calls.</string>
+    <string name="call_active_status">Active</string>
+    <string name="call_on_hold_status">On Hold</string>
+    <string name="call_conference_title">Conference Call</string>
+    <string name="call_conference_connected">Connected</string>
+    <string name="call_end_second_call">End Second Call</string>
+    <string name="add_call_tab_contacts">Contacts</string>
+    <string name="add_call_tab_dialpad">Dial Pad</string>
+    <string name="add_call_search_contacts">Search contacts...</string>
+    <string name="add_call_no_contacts">No contacts found</string>
+    <string name="add_call_select_number">Select phone number</string>
+    <string name="add_call_invalid_number">Please enter a valid phone number</string>
+    <string name="add_call_enter_number">Enter phone number</string>
+    <string name="add_call_dialpad_call">Call</string>
+    <string name="add_call_dialpad_delete">Delete</string>
 </resources>

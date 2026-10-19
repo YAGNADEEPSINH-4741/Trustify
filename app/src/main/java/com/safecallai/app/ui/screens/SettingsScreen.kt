@@ -235,10 +235,10 @@ fun SettingsScreen(
                 try {
                     roleLauncher.launch(intent)
                 } catch (_: Exception) {
-                    Toast.makeText(context, "Call Screening Service is bound automatically on this Android version", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Call Screening role is not available on this device", Toast.LENGTH_LONG).show()
                 }
             } else {
-                Toast.makeText(context, "Call Screening Service is bound automatically on this Android version", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Call Screening role is not available on this device", Toast.LENGTH_LONG).show()
             }
         },
         onRequestDefaultDialer = {
@@ -527,7 +527,7 @@ fun SettingsScreenContent(
                             onCheckedChange = onToggleProtection,
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
-                                checkedTrackColor = BrandBlue
+                                checkedTrackColor = MaterialTheme.colorScheme.primary
                             )
                         )
                     }
@@ -712,50 +712,6 @@ fun SettingsScreenContent(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Text(
-                        text = stringResource(R.string.settings_interactive_tests),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    OutlinedButton(
-                        onClick = { onSimulateCustomCall("+919876543210", "Amazon Logistics") },
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.Call, contentDescription = null, modifier = Modifier.size(16.dp), tint = LegitGreen)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.settings_test_amazon))
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    OutlinedButton(
-                        onClick = { onSimulateCustomCall("+919876500001", "Dr. Ananya Sharma") },
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(16.dp), tint = BrandBlue)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.settings_test_contact))
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    OutlinedButton(
-                        onClick = { onSimulateCustomCall("+911409283100", "Credit Card Dept") },
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(16.dp), tint = SpamAmber)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.settings_test_scam))
-                    }
                 }
             }
 
@@ -921,10 +877,12 @@ private fun ThemeOptionChip(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val selectedBg = MaterialTheme.colorScheme.primary
+    val selectedFg = MaterialTheme.colorScheme.onPrimary
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (isSelected) BrandBlue else Color.Transparent)
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (isSelected) selectedBg else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(vertical = 10.dp),
         contentAlignment = Alignment.Center
@@ -936,7 +894,7 @@ private fun ThemeOptionChip(
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (isSelected) selectedFg else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(6.dp))
@@ -944,7 +902,7 @@ private fun ThemeOptionChip(
                 text = label,
                 fontSize = 12.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (isSelected) selectedFg else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -958,10 +916,12 @@ private fun LanguageOptionChip(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val selectedBg = MaterialTheme.colorScheme.primary
+    val selectedFg = MaterialTheme.colorScheme.onPrimary
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (isSelected) BrandBlue else Color.Transparent)
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (isSelected) selectedBg else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(vertical = 10.dp),
         contentAlignment = Alignment.Center
@@ -979,7 +939,7 @@ private fun LanguageOptionChip(
                 text = label,
                 fontSize = 12.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (isSelected) selectedFg else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

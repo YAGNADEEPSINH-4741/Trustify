@@ -2,7 +2,6 @@ package com.safecallai.app.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,7 +45,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.safecallai.app.data.local.AppLanguage
-import com.safecallai.app.ui.theme.BrandBlue
+import com.safecallai.app.ui.components.TrustifyBrandMark
+import com.safecallai.app.ui.theme.CyanAccent
 import com.safecallai.app.ui.theme.LegitGreen
 
 /**
@@ -92,23 +92,10 @@ fun LanguageSelectionScreen(
             ) {
                 Spacer(modifier = Modifier.height(36.dp))
 
-                // Brand / Language Icon
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(BrandBlue.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Language,
-                        contentDescription = "Language",
-                        tint = BrandBlue,
-                        modifier = Modifier.size(44.dp)
-                    )
-                }
+                // Cinematic Brand Mark
+                TrustifyBrandMark(size = 72.dp)
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Multilingual Title
                 Text(
@@ -174,16 +161,19 @@ fun LanguageSelectionScreen(
                 Button(
                     onClick = { onLanguageSelected(selectedLang) },
                     shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandBlue),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(54.dp)
+                        .height(50.dp)
                 ) {
                     Text(
                         text = continueButtonText,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
 
@@ -222,13 +212,13 @@ private fun LanguageCard(
 ) {
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) BrandBlue.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant
         ),
         border = BorderStroke(
-            width = if (isSelected) 2.dp else 1.dp,
-            color = if (isSelected) BrandBlue else MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+            width = if (isSelected) 1.5.dp else 1.dp,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
         ),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -247,7 +237,7 @@ private fun LanguageCard(
                     selected = isSelected,
                     onClick = onClick,
                     colors = RadioButtonDefaults.colors(
-                        selectedColor = BrandBlue,
+                        selectedColor = MaterialTheme.colorScheme.primary,
                         unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 )
@@ -258,14 +248,14 @@ private fun LanguageCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = title,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "(${language.flag})",
-                            fontSize = 16.sp
+                            fontSize = 15.sp
                         )
                     }
 
@@ -274,7 +264,7 @@ private fun LanguageCard(
                     Text(
                         text = description,
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (isSelected) BrandBlue else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                     )
                 }
@@ -284,8 +274,8 @@ private fun LanguageCard(
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = "Selected",
-                    tint = BrandBlue,
-                    modifier = Modifier.size(24.dp)
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }

@@ -182,18 +182,31 @@ fun CallerDetailsContent(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Header Identity Card
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            com.safecallai.app.ui.components.TrustifyCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
-                    modifier = Modifier.padding(20.dp),
+                    modifier = Modifier.padding(22.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    val avatarColor = when (result.classification) {
+                        CallerClassification.VERIFIED_LEGITIMATE -> MaterialTheme.colorScheme.primary
+                        CallerClassification.LIKELY_LEGITIMATE -> MaterialTheme.colorScheme.primary
+                        CallerClassification.HIGH_RISK, CallerClassification.POTENTIAL_SPAM -> MaterialTheme.colorScheme.error
+                        else -> MaterialTheme.colorScheme.secondary
+                    }
+
+                    com.safecallai.app.ui.components.TrustifyAvatar(
+                        name = result.callerName ?: result.businessName ?: "Caller",
+                        size = 80.dp,
+                        accentColor = avatarColor
+                    )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
                     Text(
                         text = result.callerName ?: result.businessName ?: stringResource(R.string.caller_details_unverified),
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -206,7 +219,7 @@ fun CallerDetailsContent(
                         )
                         IconButton(
                             onClick = { clipboardManager.setText(AnnotatedString(result.rawNumber)) },
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(28.dp)
                         ) {
                             Icon(
                                 Icons.Default.ContentCopy,
@@ -242,9 +255,7 @@ fun CallerDetailsContent(
             }
 
             // Transparent Explanation Banner
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            com.safecallai.app.ui.components.TrustifyCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
@@ -252,7 +263,7 @@ fun CallerDetailsContent(
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = null,
-                            tint = BrandBlue,
+                            tint = com.safecallai.app.ui.theme.ElectricMint,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -278,9 +289,7 @@ fun CallerDetailsContent(
             }
 
             // Evidence Ledger
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            com.safecallai.app.ui.components.TrustifyCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
@@ -313,9 +322,7 @@ fun CallerDetailsContent(
 
             // Warnings Section if any
             if (result.warnings.isNotEmpty()) {
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = SpamAmber.copy(alpha = 0.1f)),
+                com.safecallai.app.ui.components.TrustifyCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(18.dp)) {
@@ -344,9 +351,7 @@ fun CallerDetailsContent(
             }
 
             // Actions Section
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            com.safecallai.app.ui.components.TrustifyCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
@@ -355,26 +360,28 @@ fun CallerDetailsContent(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     // Trust Toggle Button
                     Button(
                         onClick = onToggleTrust,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isTrusted) MaterialTheme.colorScheme.surface else BrandBlue
+                            containerColor = if (isTrusted) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary,
+                            contentColor = if (isTrusted) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimary
                         ),
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
                     ) {
                         Icon(
                             imageVector = if (isTrusted) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = null,
-                            tint = if (isTrusted) LegitGreen else Color.White
+                            tint = if (isTrusted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = if (isTrusted) stringResource(R.string.caller_details_remove_trusted) else stringResource(R.string.caller_details_mark_trusted),
-                            color = if (isTrusted) MaterialTheme.colorScheme.onSurface else Color.White
+                            color = if (isTrusted) MaterialTheme.colorScheme.onSurface else Color(0xFF070B14),
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
 
@@ -383,12 +390,12 @@ fun CallerDetailsContent(
                     // Report Button
                     OutlinedButton(
                         onClick = { onNavigateToReport(result.rawNumber) },
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
                     ) {
-                        Icon(Icons.Default.Flag, contentDescription = null)
+                        Icon(Icons.Default.Flag, contentDescription = null, tint = SpamAmber)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.caller_details_report_action))
+                        Text(stringResource(R.string.caller_details_report_action), color = MaterialTheme.colorScheme.onSurface)
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
@@ -401,12 +408,12 @@ fun CallerDetailsContent(
                             }
                             context.startActivity(intent)
                         },
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
                     ) {
-                        Icon(Icons.Default.Call, contentDescription = null)
+                        Icon(Icons.Default.Call, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.caller_details_call_dialer))
+                        Text(stringResource(R.string.caller_details_call_dialer), color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }

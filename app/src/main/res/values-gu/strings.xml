@@ -193,7 +193,7 @@
     <string name="settings_restricted_settings_desc">સીધી ઇન્સ્ટોલ કરેલ એપ્સ માટે Restricted Settings ચાલુ કરવી જરૂરી છે. 3 સ્ટેપમાં ઠીક કરો.</string>
     <string name="settings_restricted_fix_btn">ઠીક કરો</string>
     <string name="settings_screening_role_active">કૉલ સ્ક્રિનિંગ રોલ સક્રિય</string>
-    <string name="settings_screening_role_inactive">કૉલ સ્ક્રિનિંગ રોલ રજિસ્ટર્ડ</string>
+    <string name="settings_screening_role_inactive">કૉલ સ્ક્રિનિંગ રોલ મંજૂર નથી</string>
     <string name="settings_enable_role">રોલ સક્ષમ કરો</string>
     <string name="settings_screening_role_desc">ફોન વાગતા પહેલા Trustify ને નંબર તપાસવા અને લાઇવ ઓળખ અલર્ટ બતાવવાની પરવાનગી આપે છે.</string>
     <string name="settings_interactive_tests">ઇન્ટરેક્ટિવ કૉલિંગ સ્ક્રીન ટેસ્ટ</string>
@@ -327,4 +327,27 @@
     <string name="identity_source_osm_business">સાર્વજનિક વ્યવસાય સૂચિ</string>
     <string name="identity_source_osm_attribution">ઓળખ સ્ત્રોત: OpenStreetMap</string>
     <string name="identity_source_no_match">કોઈ વિશ્વસનીય નામ મળ્યું નથી</string>
+
+    <!-- Multi-Call, Add Call, Swap & Conference Strings (Gujarati) -->
+    <string name="call_add_call">કૉલ ઉમેરો</string>
+    <string name="call_add_call_subtitle">સંપર્ક પસંદ કરો અથવા ન સાચવેલ નંબર ડાયલ કરો</string>
+    <string name="call_swap_calls">કૉલ સ્વેપ કરો</string>
+    <string name="call_merge_calls">કૉલ મર્જ કરો</string>
+    <string name="call_merging">મર્જ થઈ રહ્યું છે…</string>
+    <string name="call_merge_unavailable_hint">કૉલ મર્જ કરવા માટે બંને કૉલ જોડાયેલા હોવા જોઈએ</string>
+    <string name="call_merge_unsupported">તમારા મોબાઇલ નેટવર્ક કેરિયર દ્વારા કોન્ફરન્સ કૉલ સમર્થિત નથી. તમે વાત ચાલુ રાખી શકો છો અને કૉલ સ્વેપ (Swap) નો ઉપયોગ કરી શકો છો.</string>
+    <string name="call_active_status">સક્રિય</string>
+    <string name="call_on_hold_status">હોલ્ડ પર</string>
+    <string name="call_conference_title">કોન્ફરન્સ કૉલ</string>
+    <string name="call_conference_connected">જોડાયેલ</string>
+    <string name="call_end_second_call">બીજો કૉલ સમાપ્ત કરો</string>
+    <string name="add_call_tab_contacts">સંપર્કો</string>
+    <string name="add_call_tab_dialpad">ડાયલ પેડ</string>
+    <string name="add_call_search_contacts">સંપર્કો શોધો...</string>
+    <string name="add_call_no_contacts">કોઈ સંપર્ક મળ્યો નથી</string>
+    <string name="add_call_select_number">ફોન નંબર પસંદ કરો</string>
+    <string name="add_call_invalid_number">કૃપા કરીને માન્ય ફોન નંબર દાખલ કરો</string>
+    <string name="add_call_enter_number">ફોન નંબર દાખલ કરો</string>
+    <string name="add_call_dialpad_call">કૉલ</string>
+    <string name="add_call_dialpad_delete">કાઢી નાખો</string>
 </resources>

@@ -143,8 +143,8 @@ fun RecentActivityScreenContent(
                         onClick = { selectedFilter = "ALL" },
                         label = { Text(stringResource(R.string.activity_filter_all_count, recentCalls.size)) },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = BrandBlue.copy(alpha = 0.2f),
-                            selectedLabelColor = BrandBlue
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
                         )
                     )
                 }
@@ -152,21 +152,33 @@ fun RecentActivityScreenContent(
                     FilterChip(
                         selected = selectedFilter == "FALSE_SPAM",
                         onClick = { selectedFilter = "FALSE_SPAM" },
-                        label = { Text(stringResource(R.string.activity_filter_false_spam_count, falseSpamRecoveredCount)) }
+                        label = { Text(stringResource(R.string.activity_filter_false_spam_count, falseSpamRecoveredCount)) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
+                            selectedLabelColor = MaterialTheme.colorScheme.secondary
+                        )
                     )
                 }
                 item {
                     FilterChip(
                         selected = selectedFilter == "VERIFIED",
                         onClick = { selectedFilter = "VERIFIED" },
-                        label = { Text(stringResource(R.string.activity_filter_verified_count, verifiedCount)) }
+                        label = { Text(stringResource(R.string.activity_filter_verified_count, verifiedCount)) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
+                        )
                     )
                 }
                 item {
                     FilterChip(
                         selected = selectedFilter == "POTENTIAL_SPAM",
                         onClick = { selectedFilter = "POTENTIAL_SPAM" },
-                        label = { Text(stringResource(R.string.activity_filter_spam_risk)) }
+                        label = { Text(stringResource(R.string.activity_filter_spam_risk)) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
+                            selectedLabelColor = MaterialTheme.colorScheme.tertiary
+                        )
                     )
                 }
             }
@@ -174,38 +186,11 @@ fun RecentActivityScreenContent(
             Spacer(modifier = Modifier.height(8.dp))
 
             if (recentCalls.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.FilterList,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = stringResource(R.string.activity_empty_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = stringResource(R.string.activity_empty_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
-                    }
-                }
+                com.safecallai.app.ui.components.TrustifyEmptyState(
+                    icon = Icons.Default.FilterList,
+                    title = stringResource(R.string.activity_empty_title),
+                    description = stringResource(R.string.activity_empty_desc)
+                )
             } else if (filteredCalls.isEmpty()) {
                 Box(
                     modifier = Modifier

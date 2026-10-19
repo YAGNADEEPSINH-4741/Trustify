@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CallEnd
@@ -89,14 +90,25 @@ import com.safecallai.app.domain.models.CommunityClassification
 import com.safecallai.app.domain.models.CommunityReputation
 import com.safecallai.app.domain.models.ContactInfo
 import com.safecallai.app.domain.models.VerificationStatus
+import com.safecallai.app.service.CallManager
 import com.safecallai.app.service.CallState
 import com.safecallai.app.service.CallUiState
+import com.safecallai.app.service.MergeButtonState
 import com.safecallai.app.service.QuickReplyManager
 import com.safecallai.app.ui.components.ClassificationBadge
 import com.safecallai.app.ui.components.VerificationStatusChip
 import com.safecallai.app.ui.theme.BrandBlue
+import com.safecallai.app.ui.theme.CyanAccent
+import com.safecallai.app.ui.theme.ElectricMint
 import com.safecallai.app.ui.theme.HighRiskRed
 import com.safecallai.app.ui.theme.LegitGreen
+import com.safecallai.app.ui.theme.Navy750
+import com.safecallai.app.ui.theme.Navy800
+import com.safecallai.app.ui.theme.Navy850
+import com.safecallai.app.ui.theme.Navy900
+import com.safecallai.app.ui.theme.Navy950
+import com.safecallai.app.ui.theme.CallDurationTextStyle
+import com.safecallai.app.ui.theme.PhoneNumberTextStyle
 import com.safecallai.app.ui.theme.SpamAmber
 
 @Composable
@@ -122,7 +134,14 @@ fun IncomingCallScreen(
     onVoteSpam: (phoneNumber: String) -> Unit = {},
     onVoteNotSpam: (phoneNumber: String) -> Unit = {},
     onRetryVote: () -> Unit = {},
-    onDismissPostCallFeedback: () -> Unit = {}
+    onDismissPostCallFeedback: () -> Unit = {},
+    onAddCall: () -> Unit = {},
+    onSwapCalls: () -> Unit = {},
+    onMergeCalls: () -> Unit = {},
+    onEndSecondaryCall: () -> Unit = {},
+    onCloseAddCall: () -> Unit = {},
+    onCallSelectedNumber: (String) -> Unit = {},
+    onDismissMultiCallMessage: () -> Unit = {}
 ) {
     var showQuickReplySheet by remember { mutableStateOf(false) }
     var showPermissionRationaleDialog by remember { mutableStateOf(false) }
@@ -144,13 +163,34 @@ fun IncomingCallScreen(
                     )
                 }
                 CallState.DIALING, CallState.ACTIVE, CallState.HOLDING -> {
-                    ActiveCallView(
-                        uiState = uiState,
-                        onHangUp = onHangUp,
-                        onToggleMute = onToggleMute,
-                        onToggleSpeaker = onToggleSpeaker,
-                        onToggleHold = onToggleHold
-                    )
+                    if (uiState.isConference) {
+                        ConferenceCallView(
+                            uiState = uiState,
+                            onHangUp = onHangUp,
+                            onToggleMute = onToggleMute,
+                            onToggleSpeaker = onToggleSpeaker,
+                            onAddCall = onAddCall
+                        )
+                    } else if (uiState.isMultiCall) {
+                        MultiCallView(
+                            uiState = uiState,
+                            onHangUp = onHangUp,
+                            onToggleMute = onToggleMute,
+                            onToggleSpeaker = onToggleSpeaker,
+                            onSwapCalls = onSwapCalls,
+                            onMergeCalls = onMergeCalls,
+                            onEndSecondaryCall = onEndSecondaryCall
+                        )
+                    } else {
+                        ActiveCallView(
+                            uiState = uiState,
+                            onHangUp = onHangUp,
+                            onToggleMute = onToggleMute,
+                            onToggleSpeaker = onToggleSpeaker,
+                            onToggleHold = onToggleHold,
+                            onAddCall = onAddCall
+                        )
+                    }
                 }
                 CallState.DISCONNECTED -> {
                     DisconnectedCallView(
@@ -342,6 +382,35 @@ fun IncomingCallScreen(
                     TextButton(onClick = { showPermissionRationaleDialog = false }) {
                         Text(stringResource(R.string.btn_cancel))
                     }
+                }
+            }
+        )
+    }
+
+    // Fullscreen Add Call Overlay
+    if (uiState.isAddingCall) {
+        AddCallScreen(
+            onDismiss = onCloseAddCall,
+            onCallNumber = onCallSelectedNumber
+        )
+    }
+
+    // Carrier Limitation / Multi-call feedback alert
+    if (uiState.multiCallMessage != null) {
+        AlertDialog(
+            onDismissRequest = onDismissMultiCallMessage,
+            title = {
+                Text(
+                    text = stringResource(R.string.call_conference_title),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(text = uiState.multiCallMessage ?: "")
+            },
+            confirmButton = {
+                Button(onClick = onDismissMultiCallMessage) {
+                    Text(text = stringResource(R.string.btn_ok))
                 }
             }
         )
@@ -616,15 +685,16 @@ private fun RingingCallView(
                     FilledIconButton(
                         onClick = onDecline,
                         colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = HighRiskRed,
-                            contentColor = Color.White
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
                         ),
-                        modifier = Modifier.size(76.dp)
+                        modifier = Modifier.size(72.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.CallEnd,
                             contentDescription = stringResource(R.string.call_decline),
-                            modifier = Modifier.size(34.dp)
+                            tint = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
@@ -632,7 +702,7 @@ private fun RingingCallView(
                         text = stringResource(R.string.call_decline),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.Medium
                     )
                 }
 
@@ -641,15 +711,16 @@ private fun RingingCallView(
                     FilledIconButton(
                         onClick = onAnswer,
                         colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = LegitGreen,
-                            contentColor = Color.White
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
-                        modifier = Modifier.size(76.dp)
+                        modifier = Modifier.size(72.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Call,
                             contentDescription = stringResource(R.string.call_answer),
-                            modifier = Modifier.size(34.dp)
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
@@ -657,7 +728,7 @@ private fun RingingCallView(
                         text = stringResource(R.string.call_answer),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
@@ -993,7 +1064,8 @@ private fun ActiveCallView(
     onHangUp: () -> Unit,
     onToggleMute: () -> Unit,
     onToggleSpeaker: () -> Unit,
-    onToggleHold: () -> Unit
+    onToggleHold: () -> Unit,
+    onAddCall: () -> Unit = {}
 ) {
     val contact = uiState.contactInfo
     val result = uiState.classificationResult
@@ -1057,10 +1129,12 @@ private fun ActiveCallView(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = if (isDialing && uiState.durationSeconds == 0L) "Connecting..." else durationText,
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                text = if (isDialing && uiState.durationSeconds == 0L) stringResource(R.string.call_calling) else durationText,
+                style = CallDurationTextStyle.copy(
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -1074,9 +1148,13 @@ private fun ActiveCallView(
 
             Text(
                 text = primaryTitle,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = (-0.4).sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
             )
 
             val sourceLabel = when {
@@ -1095,12 +1173,14 @@ private fun ActiveCallView(
 
             Text(
                 text = uiState.displayNumber.ifEmpty { uiState.rawNumber },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = PhoneNumberTextStyle.copy(
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
         }
 
-        // Mid in-call tools: Mute, Hold (if supported), Speaker
+        // Mid in-call tools: Mute, Hold, Add Call, Speaker
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -1113,7 +1193,7 @@ private fun ActiveCallView(
                         containerColor = if (uiState.isMuted) HighRiskRed else MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = if (uiState.isMuted) Color.White else MaterialTheme.colorScheme.onSurface
                     ),
-                    modifier = Modifier.size(56.dp)
+                    modifier = Modifier.size(54.dp)
                 ) {
                     Icon(
                         imageVector = if (uiState.isMuted) Icons.Default.MicOff else Icons.Default.Mic,
@@ -1138,7 +1218,7 @@ private fun ActiveCallView(
                             containerColor = if (uiState.isOnHold) SpamAmber else MaterialTheme.colorScheme.surfaceVariant,
                             contentColor = if (uiState.isOnHold) Color.White else MaterialTheme.colorScheme.onSurface
                         ),
-                        modifier = Modifier.size(56.dp)
+                        modifier = Modifier.size(54.dp)
                     ) {
                         Icon(
                             imageVector = if (uiState.isOnHold) Icons.Default.PlayArrow else Icons.Default.Pause,
@@ -1154,6 +1234,31 @@ private fun ActiveCallView(
                 }
             }
 
+            // Add Call Button
+            if (uiState.canAddCall || uiState.callState == CallState.ACTIVE || uiState.callState == CallState.HOLDING || uiState.isSimulated) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    FilledIconButton(
+                        onClick = onAddCall,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.size(54.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(R.string.call_add_call)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = stringResource(R.string.call_add_call),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
             // Speaker Toggle
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 FilledIconButton(
@@ -1162,7 +1267,7 @@ private fun ActiveCallView(
                         containerColor = if (uiState.isSpeakerOn) BrandBlue else MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = if (uiState.isSpeakerOn) Color.White else MaterialTheme.colorScheme.onSurface
                     ),
-                    modifier = Modifier.size(56.dp)
+                    modifier = Modifier.size(54.dp)
                 ) {
                     Icon(
                         imageVector = if (uiState.isSpeakerOn) Icons.Default.VolumeUp else Icons.Default.VolumeDown,
@@ -1183,6 +1288,741 @@ private fun ActiveCallView(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(bottom = 28.dp)
         ) {
+            FilledIconButton(
+                onClick = onHangUp,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = HighRiskRed,
+                    contentColor = Color.White
+                ),
+                modifier = Modifier.size(76.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CallEnd,
+                    contentDescription = stringResource(R.string.call_end),
+                    modifier = Modifier.size(34.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.call_end),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+/**
+ * Dedicated Two-Call interface displaying Active Call card, On Hold Call card,
+ * Swap Calls action, Merge Calls action, and call controls.
+ */
+@Composable
+private fun MultiCallView(
+    uiState: CallUiState,
+    onHangUp: () -> Unit,
+    onToggleMute: () -> Unit,
+    onToggleSpeaker: () -> Unit,
+    onSwapCalls: () -> Unit,
+    onMergeCalls: () -> Unit,
+    onEndSecondaryCall: () -> Unit
+) {
+    val primary = uiState.primaryCall
+    val secondary = uiState.secondaryCall
+
+    // Determine active/foreground call and held call
+    val activeCall = when {
+        primary != null && primary.callState == CallState.ACTIVE && !primary.isOnHold -> primary
+        secondary != null && secondary.callState == CallState.ACTIVE && !secondary.isOnHold -> secondary
+        secondary != null && secondary.callState == CallState.DIALING -> secondary
+        primary != null && primary.callState == CallState.DIALING -> primary
+        else -> primary
+    }
+    val heldCall = if (activeCall == secondary) primary else secondary
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp, vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.call_in_progress),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Card 1: Active or Dialing Call (Foreground participant)
+            if (activeCall != null) {
+                val actIsDialing = activeCall.callState == CallState.DIALING
+                val actIsHolding = activeCall.isOnHold || activeCall.callState == CallState.HOLDING
+                val actMin = activeCall.durationSeconds / 60
+                val actSec = activeCall.durationSeconds % 60
+                val actDuration = String.format("%02d:%02d", actMin, actSec)
+                val actTitle = activeCall.callerName?.ifBlank { null }
+                    ?: activeCall.displayNumber.ifEmpty { activeCall.rawNumber }
+
+                val actBorderColor = when {
+                    actIsDialing -> MaterialTheme.colorScheme.secondary
+                    actIsHolding -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f)
+                    else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                }
+                val actBadgeColor = when {
+                    actIsDialing -> MaterialTheme.colorScheme.secondary
+                    actIsHolding -> MaterialTheme.colorScheme.tertiary
+                    else -> MaterialTheme.colorScheme.primary
+                }
+                val actBadgeText = when {
+                    actIsDialing -> stringResource(R.string.call_calling)
+                    actIsHolding -> stringResource(R.string.call_on_hold_status)
+                    else -> stringResource(R.string.call_active_status)
+                }
+
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    border = BorderStroke(1.dp, actBorderColor),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(actBadgeColor.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (actIsDialing) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(22.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            } else if (actIsHolding) {
+                                Icon(
+                                    imageVector = Icons.Default.Pause,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.tertiary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Call,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = actTitle,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(actBadgeColor.copy(alpha = 0.15f))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = actBadgeText,
+                                        color = actBadgeColor,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+
+                            if (activeCall.callerName != null && activeCall.callerName != activeCall.displayNumber) {
+                                Text(
+                                    text = activeCall.displayNumber.ifEmpty { activeCall.rawNumber },
+                                    style = PhoneNumberTextStyle.copy(fontSize = 13.sp, lineHeight = 16.sp),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Text(
+                                text = if (actIsDialing) stringResource(R.string.call_calling) else actDuration,
+                                style = CallDurationTextStyle.copy(fontSize = 13.sp, fontWeight = FontWeight.Medium),
+                                color = actBadgeColor
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Card 2: Held or Background Call (never displays Active)
+            if (heldCall != null) {
+                val isHeldDialing = heldCall.callState == CallState.DIALING
+                val heldMin = heldCall.durationSeconds / 60
+                val heldSec = heldCall.durationSeconds % 60
+                val heldDuration = String.format("%02d:%02d", heldMin, heldSec)
+                val heldTitle = heldCall.callerName?.ifBlank { null }
+                    ?: heldCall.displayNumber.ifEmpty { heldCall.rawNumber }
+
+                val heldBorderColor = when {
+                    isHeldDialing -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
+                    else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
+                }
+                val heldBadgeColor = when {
+                    isHeldDialing -> MaterialTheme.colorScheme.secondary
+                    else -> MaterialTheme.colorScheme.tertiary
+                }
+                val heldBadgeText = when {
+                    isHeldDialing -> stringResource(R.string.call_calling)
+                    else -> stringResource(R.string.call_on_hold_status)
+                }
+
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                    ),
+                    border = BorderStroke(1.dp, heldBorderColor),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(heldBadgeColor.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isHeldDialing) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(22.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Pause,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.tertiary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = heldTitle,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(heldBadgeColor.copy(alpha = 0.15f))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = heldBadgeText,
+                                        color = heldBadgeColor,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+
+                            if (heldCall.callerName != null && heldCall.callerName != heldCall.displayNumber) {
+                                Text(
+                                    text = heldCall.displayNumber.ifEmpty { heldCall.rawNumber },
+                                    style = PhoneNumberTextStyle.copy(fontSize = 13.sp, lineHeight = 16.sp),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Text(
+                                text = if (isHeldDialing) stringResource(R.string.call_calling) else heldDuration,
+                                style = CallDurationTextStyle.copy(fontSize = 13.sp, fontWeight = FontWeight.Medium),
+                                color = heldBadgeColor
+                            )
+                        }
+
+                        // Disconnect Held / Secondary Button
+                        IconButton(
+                            onClick = onEndSecondaryCall,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.error.copy(alpha = 0.12f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CallEnd,
+                                contentDescription = stringResource(R.string.call_end_second_call),
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Two-Call Actions: Swap Calls & Merge Calls
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // Swap Calls Button
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    FilledIconButton(
+                        onClick = onSwapCalls,
+                        enabled = uiState.canSwap,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                        ),
+                        modifier = Modifier.size(60.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = stringResource(R.string.call_swap_calls),
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = stringResource(R.string.call_swap_calls),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                // Merge Calls Button
+                val isMerging = uiState.mergeState == MergeButtonState.MERGING
+                val isReady = uiState.mergeState == MergeButtonState.READY
+                val unavailableMsg = stringResource(R.string.call_merge_unavailable_hint)
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable(
+                        enabled = !isReady && !isMerging,
+                        onClick = {
+                            val failureMsg = uiState.mergeFailureReason ?: unavailableMsg
+                            CallManager.showMergeUnavailableReason(failureMsg)
+                        }
+                    )
+                ) {
+                    FilledIconButton(
+                        onClick = onMergeCalls,
+                        enabled = isReady,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = if (isMerging) {
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
+                            } else {
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                            },
+                            disabledContentColor = if (isMerging) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                            }
+                        ),
+                        modifier = Modifier.size(60.dp)
+                    ) {
+                        if (isMerging) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.5.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Call,
+                                contentDescription = if (isMerging) stringResource(R.string.call_merging) else stringResource(R.string.call_merge_calls),
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = if (isMerging) stringResource(R.string.call_merging) else stringResource(R.string.call_merge_calls),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (isReady || isMerging) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
+                }
+            }
+        }
+
+        // Bottom Tools: Mute, Speaker, Hang Up
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // Mute
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    FilledIconButton(
+                        onClick = onToggleMute,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = if (uiState.isMuted) HighRiskRed else MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = if (uiState.isMuted) Color.White else MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.size(54.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (uiState.isMuted) Icons.Default.MicOff else Icons.Default.Mic,
+                            contentDescription = stringResource(R.string.call_mute)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = if (uiState.isMuted) stringResource(R.string.call_muted) else stringResource(R.string.call_mute),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // Speaker
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    FilledIconButton(
+                        onClick = onToggleSpeaker,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = if (uiState.isSpeakerOn) BrandBlue else MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = if (uiState.isSpeakerOn) Color.White else MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.size(54.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (uiState.isSpeakerOn) Icons.Default.VolumeUp else Icons.Default.VolumeDown,
+                            contentDescription = stringResource(R.string.call_speaker)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = if (uiState.isSpeakerOn) stringResource(R.string.call_speaker_on) else stringResource(R.string.call_speaker),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Hang Up Active Call
+            FilledIconButton(
+                onClick = onHangUp,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = HighRiskRed,
+                    contentColor = Color.White
+                ),
+                modifier = Modifier.size(72.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CallEnd,
+                    contentDescription = stringResource(R.string.call_end),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.call_end),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+/**
+ * Dedicated Conference Call view displaying conference status, participant roster,
+ * unified elapsed call duration, and conference controls.
+ */
+@Composable
+private fun ConferenceCallView(
+    uiState: CallUiState,
+    onHangUp: () -> Unit,
+    onToggleMute: () -> Unit,
+    onToggleSpeaker: () -> Unit,
+    onAddCall: () -> Unit = {}
+) {
+    val minutes = uiState.durationSeconds / 60
+    val seconds = uiState.durationSeconds % 60
+    val durationText = String.format("%02d:%02d", minutes, seconds)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(top = 24.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                    .padding(horizontal = 14.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.call_conference_title),
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.sp
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = durationText,
+                style = CallDurationTextStyle.copy(
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Conference participants list card
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Text(
+                        text = "Participants",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    val participantList = if (uiState.conferenceParticipants.isNotEmpty()) {
+                        uiState.conferenceParticipants
+                    } else {
+                        listOfNotNull(uiState.primaryCall, uiState.secondaryCall)
+                    }
+
+                    participantList.forEach { participant ->
+                        val participantName = participant.callerName ?: participant.displayNumber.ifEmpty { participant.rawNumber.ifEmpty { "Participant" } }
+                        val showPhoneSubtitle = participant.callerName != null && participant.displayNumber.isNotBlank() && participant.callerName != participant.displayNumber
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = participantName,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    if (showPhoneSubtitle) {
+                                        Text(
+                                            text = participant.displayNumber,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+
+                            val isHeld = participant.isOnHold || participant.callState == CallState.HOLDING
+                            val isDialing = participant.callState == CallState.DIALING
+                            val badgeColor = when {
+                                isHeld -> SpamAmber
+                                isDialing -> BrandBlue
+                                else -> LegitGreen
+                            }
+                            val badgeLabel = when {
+                                isHeld -> stringResource(R.string.call_on_hold_status)
+                                isDialing -> "Connecting"
+                                else -> stringResource(R.string.call_conference_connected)
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(badgeColor.copy(alpha = 0.15f))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = badgeLabel,
+                                    color = badgeColor,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Bottom tools: Mute, Add Call (optional), Speaker, Hang Up
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // Mute Toggle
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    FilledIconButton(
+                        onClick = onToggleMute,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = if (uiState.isMuted) HighRiskRed else MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = if (uiState.isMuted) Color.White else MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.size(56.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (uiState.isMuted) Icons.Default.MicOff else Icons.Default.Mic,
+                            contentDescription = stringResource(R.string.call_mute)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = if (uiState.isMuted) stringResource(R.string.call_muted) else stringResource(R.string.call_mute),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // Add Call (if carrier/Telecom allows adding a participant)
+                if (uiState.canAddCall) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        FilledIconButton(
+                            onClick = onAddCall,
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            ),
+                            modifier = Modifier.size(56.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(R.string.call_add_call)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = stringResource(R.string.call_add_call),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Speaker Toggle
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    FilledIconButton(
+                        onClick = onToggleSpeaker,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = if (uiState.isSpeakerOn) BrandBlue else MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = if (uiState.isSpeakerOn) Color.White else MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.size(56.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (uiState.isSpeakerOn) Icons.Default.VolumeUp else Icons.Default.VolumeDown,
+                            contentDescription = stringResource(R.string.call_speaker)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = if (uiState.isSpeakerOn) stringResource(R.string.call_speaker_on) else stringResource(R.string.call_speaker),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // Hang Up Conference Call Button
             FilledIconButton(
                 onClick = onHangUp,
                 colors = IconButtonDefaults.filledIconButtonColors(

@@ -26,12 +26,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -67,13 +71,22 @@ class MainActivity : ComponentActivity() {
         super.attachBaseContext(localizedContext)
     }
 
+    companion object {
+        var hasCompletedInitialSplash = false
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val initialPhoneNumber = intent?.getStringExtra("EXTRA_PHONE_NUMBER")
+        val isDeepLinkOrDial = !initialPhoneNumber.isNullOrBlank() || intent?.action == android.content.Intent.ACTION_DIAL
+        if (isDeepLinkOrDial) {
+            hasCompletedInitialSplash = true
+        }
 
         setContent {
             val uiState by viewModel.uiState.collectAsState()
+            var showSplash by remember { mutableStateOf(!hasCompletedInitialSplash) }
 
             // Dynamic locale binding for Jetpack Compose string resources
             val localizedContext = remember(uiState.appLanguage) {
@@ -93,13 +106,28 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        TrustifyApp(
-                            viewModel = viewModel,
-                            initialPhoneNumber = initialPhoneNumber,
-                            onLanguageChanged = { lang ->
-                                viewModel.setLanguage(lang, this@MainActivity)
+                        androidx.compose.animation.Crossfade(
+                            targetState = showSplash,
+                            animationSpec = androidx.compose.animation.core.tween(400),
+                            label = "splashCrossfade"
+                        ) { isSplash ->
+                            if (isSplash) {
+                                com.safecallai.app.ui.screens.SplashScreen(
+                                    onAnimationComplete = {
+                                        hasCompletedInitialSplash = true
+                                        showSplash = false
+                                    }
+                                )
+                            } else {
+                                TrustifyApp(
+                                    viewModel = viewModel,
+                                    initialPhoneNumber = initialPhoneNumber,
+                                    onLanguageChanged = { lang ->
+                                        viewModel.setLanguage(lang, this@MainActivity)
+                                    }
+                                )
                             }
-                        )
+                        }
                     }
                 }
             }
@@ -162,37 +190,58 @@ fun TrustifyApp(
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+                    ),
+                    shadowElevation = 8.dp
                 ) {
-                    bottomNavItems.forEach { item ->
-                        val selected = currentRoute == item.screen.route
-                        val labelText = stringResource(item.labelRes)
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                val targetRoute = if (item.screen == Screen.Report) Screen.Report.createRoute() else item.screen.route
-                                navController.navigate(targetRoute) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                    NavigationBar(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        tonalElevation = 0.dp
+                    ) {
+                        bottomNavItems.forEach { item ->
+                            val selected = currentRoute == item.screen.route
+                            val labelText = stringResource(item.labelRes)
+                            NavigationBarItem(
+                                selected = selected,
+                                onClick = {
+                                    val targetRoute = if (item.screen == Screen.Report) Screen.Report.createRoute() else item.screen.route
+                                    navController.navigate(targetRoute) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = labelText,
-                                    tint = if (selected) BrandBlue else MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                                icon = {
+                                    Icon(
+                                        imageVector = item.icon,
+                                        contentDescription = labelText,
+                                        tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                },
+                                label = {
+                                    Text(
+                                        text = labelText,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                },
+                                colors = NavigationBarItemDefaults.colors(
+                                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                            },
-                            label = { Text(labelText) },
-                            colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = BrandBlue.copy(alpha = 0.15f)
                             )
-                        )
+                        }
                     }
                 }
             }

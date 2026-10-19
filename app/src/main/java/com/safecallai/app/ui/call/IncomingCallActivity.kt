@@ -31,6 +31,7 @@ import kotlinx.coroutines.delay
  * character counting, multipart SMS, permission handling, and messaging app fallback.
  */
 import android.content.Context
+import android.content.Intent
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import com.safecallai.app.R
 import com.safecallai.app.data.local.AppLanguage
@@ -101,10 +102,11 @@ class IncomingCallActivity : ComponentActivity() {
 
             // Fetch caller identity if not yet resolved
             LaunchedEffect(uiState.rawNumber) {
-                if (uiState.callerIdentity == null && PhoneNumberNormalizer.isValid(uiState.rawNumber)) {
+                val targetNumber = uiState.rawNumber
+                if (uiState.callerIdentity == null && PhoneNumberNormalizer.isValid(targetNumber)) {
                     try {
-                        val resolvedIdentity = app.repository.identifyCaller(uiState.rawNumber, allowNetworkQuery = true)
-                        CallManager.updateCallerIdentity(resolvedIdentity)
+                        val resolvedIdentity = app.repository.identifyCaller(targetNumber, allowNetworkQuery = true)
+                        CallManager.updateCallerIdentity(targetNumber, resolvedIdentity)
                     } catch (_: Exception) {}
                 }
             }
@@ -118,9 +120,10 @@ class IncomingCallActivity : ComponentActivity() {
                 }
             }
 
-            // Auto-finish if number is invalid/withheld, or user dismissed, or after vote submitted, or if user already voted
-            LaunchedEffect(uiState.callState, hasDismissedFeedback, submittedVoteResult, userAlreadyVoted) {
-                if (uiState.callState == CallState.DISCONNECTED) {
+            // Auto-finish only when ALL calls have genuinely ended (both primary and secondary are null)
+            LaunchedEffect(uiState.callState, uiState.primaryCall, uiState.secondaryCall, hasDismissedFeedback, submittedVoteResult, userAlreadyVoted) {
+                val hasAnyCall = uiState.primaryCall != null || uiState.secondaryCall != null
+                if (uiState.callState == CallState.DISCONNECTED && !hasAnyCall) {
                     if (!PhoneNumberNormalizer.isValid(uiState.rawNumber) || hasDismissedFeedback) {
                         delay(1000L)
                         CallManager.reset()
@@ -237,7 +240,16 @@ class IncomingCallActivity : ComponentActivity() {
                             hasDismissedFeedback = true
                             CallManager.reset()
                             finish()
-                        }
+                        },
+                        onAddCall = { CallManager.showAddCall(true) },
+                        onSwapCalls = { CallManager.swapCalls() },
+                        onMergeCalls = { CallManager.mergeCalls() },
+                        onEndSecondaryCall = { CallManager.hangUpSecondaryCall() },
+                        onCloseAddCall = { CallManager.showAddCall(false) },
+                        onCallSelectedNumber = { number ->
+                            CallManager.addCall(this@IncomingCallActivity, number)
+                        },
+                        onDismissMultiCallMessage = { CallManager.dismissMultiCallMessage() }
                     )
                 }
             }
@@ -314,10 +326,32 @@ class IncomingCallActivity : ComponentActivity() {
         )
     }
 
+    override fun onResume() {
+        super.onResume()
+        CallManager.reconcileStateWithTelecom()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        CallManager.acquireWakeLocks(this)
+        CallManager.reconcileStateWithTelecom()
+    }
+
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
-        val currentState = CallManager.callUiState.value.callState
-        if (currentState == CallState.RINGING || currentState == CallState.DIALING) {
+        val uiState = CallManager.callUiState.value
+        if (uiState.isAddingCall) {
+            CallManager.showAddCall(false)
+            return
+        }
+        val currentState = uiState.callState
+        if (currentState == CallState.RINGING) {
             CallManager.decline()
+        } else if (currentState == CallState.DIALING && !uiState.isMultiCall && uiState.secondaryCall == null) {
+            CallManager.decline()
+        } else if (uiState.isMultiCall && uiState.secondaryCall?.callState == CallState.DIALING) {
+            CallManager.hangUpSecondaryCall()
         } else {
             super.onBackPressed()
         }

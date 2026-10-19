@@ -69,8 +69,8 @@ class SafeCallInCallService : InCallService() {
                     val identityResult = repository.identifyCaller(rawNumber, call.details, allowNetworkQuery = true)
                     val classificationResult = repository.screenAndClassify(rawNumber, recordInHistory = true, telecomDetails = call.details)
                     serviceScope.launch(Dispatchers.Main) {
-                        CallManager.updateCallerIdentity(identityResult)
-                        CallManager.updateClassification(classificationResult)
+                        CallManager.updateCallerIdentity(rawNumber, identityResult)
+                        CallManager.updateClassification(rawNumber, classificationResult)
                     }
                 } catch (_: Exception) {
                     // Safe fallback
@@ -81,6 +81,6 @@ class SafeCallInCallService : InCallService() {
 
     override fun onCallRemoved(call: Call) {
         super.onCallRemoved(call)
-        CallManager.unbindCall()
+        CallManager.onCallRemoved(call)
     }
 }

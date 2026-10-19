@@ -13,36 +13,58 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.safecallai.app.data.local.PreferencesManager
 
-private val DarkColorScheme = darkColorScheme(
-    primary = BrandBlueLight,
-    onPrimary = Slate950,
-    primaryContainer = BrandBlue,
-    onPrimaryContainer = Color.White,
-    secondary = BrandCyan,
-    onSecondary = Slate950,
-    background = Slate950,
-    onBackground = Slate50,
-    surface = Slate900,
-    onSurface = Slate200,
-    surfaceVariant = Slate800,
-    onSurfaceVariant = Slate400,
-    outline = Slate700
+// ============================================================================
+// QUIET PREMIUM — MATERIAL 3 COLOR SCHEMES
+// ============================================================================
+
+val DarkColorScheme = darkColorScheme(
+    primary = DarkAccentMint,
+    onPrimary = DarkBackground,
+    primaryContainer = DarkAccentSubtleSurface,
+    onPrimaryContainer = DarkAccentMint,
+    secondary = DarkInfo,
+    onSecondary = DarkBackground,
+    secondaryContainer = DarkSurfaceElevated,
+    onSecondaryContainer = DarkInfo,
+    tertiary = DarkWarning,
+    onTertiary = DarkBackground,
+    background = DarkBackground,
+    onBackground = DarkTextPrimary,
+    surface = DarkSurfacePrimary,
+    onSurface = DarkTextPrimary,
+    surfaceVariant = DarkSurfaceSecondary,
+    onSurfaceVariant = DarkTextSecondary,
+    outline = DarkBorder,
+    outlineVariant = DarkBorderSubtle,
+    error = DarkError,
+    onError = Color.White,
+    errorContainer = HighRiskRedContainer,
+    onErrorContainer = DarkError
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = BrandBlue,
+val LightColorScheme = lightColorScheme(
+    primary = LightAccentMint,
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFDBEAFE),
-    onPrimaryContainer = Color(0xFF1E3A8A),
-    secondary = Color(0xFF0284C7),
+    primaryContainer = LightAccentSubtleSurface,
+    onPrimaryContainer = LightAccentMint,
+    secondary = LightInfo,
     onSecondary = Color.White,
-    background = Color(0xFFF8FAFC),
-    onBackground = Color(0xFF0F172A),
-    surface = Color.White,
-    onSurface = Color(0xFF0F172A),
-    surfaceVariant = Color(0xFFF1F5F9),
-    onSurfaceVariant = Color(0xFF475569),
-    outline = Color(0xFFCBD5E1)
+    secondaryContainer = Color(0xFFDDF4FF),
+    onSecondaryContainer = LightInfo,
+    tertiary = LightWarning,
+    onTertiary = Color.White,
+    background = LightBackground,
+    onBackground = LightTextPrimary,
+    surface = LightSurfacePrimary,
+    onSurface = LightTextPrimary,
+    surfaceVariant = LightSurfaceSecondary,
+    onSurfaceVariant = LightTextSecondary,
+    outline = LightBorder,
+    outlineVariant = LightBorderSubtle,
+    error = LightError,
+    onError = Color.White,
+    errorContainer = Color(0xFFFFEBE9),
+    onErrorContainer = LightError
 )
 
 @Composable
@@ -73,13 +95,13 @@ fun TrustifyTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = TrustifyTypography,
         content = content
     )
 }
 
 /**
- * Backward compatibility alias for TrustifyTheme.
+ * Backward compatibility alias for SafeCallAITheme.
  */
 @Composable
 fun SafeCallAITheme(
@@ -91,9 +113,5 @@ fun SafeCallAITheme(
     },
     content: @Composable () -> Unit
 ) {
-    TrustifyTheme(
-        themeMode = themeMode,
-        darkTheme = darkTheme,
-        content = content
-    )
+    TrustifyTheme(themeMode = themeMode, darkTheme = darkTheme, content = content)
 }

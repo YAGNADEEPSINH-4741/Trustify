@@ -193,7 +193,7 @@
     <string name="settings_restricted_settings_desc">सीधे इंस्टॉल की गई ऐप्स के लिए Restricted Settings चालू करना आवश्यक है। 3 चरणों में ठीक करें।</string>
     <string name="settings_restricted_fix_btn">ठीक करें</string>
     <string name="settings_screening_role_active">कॉल स्क्रीनिंग रोल सक्रिय</string>
-    <string name="settings_screening_role_inactive">कॉल स्क्रीनिंग रोल पंजीकृत</string>
+    <string name="settings_screening_role_inactive">कॉल स्क्रीनिंग रोल स्वीकृत नहीं</string>
     <string name="settings_enable_role">रोल सक्षम करें</string>
     <string name="settings_screening_role_desc">फ़ोन बजने से पहले Trustify को नंबर की जांच करने और लाइव पहचान अलर्ट दिखाने की अनुमति देता है।</string>
     <string name="settings_interactive_tests">इंटरैक्टिव कॉलिंग स्क्रीन परीक्षण</string>
@@ -327,4 +327,27 @@
     <string name="identity_source_osm_business">सार्वजनिक व्यावसायिक सूची</string>
     <string name="identity_source_osm_attribution">पहचान स्रोत: OpenStreetMap</string>
     <string name="identity_source_no_match">कोई विश्वसनीय नाम नहीं मिला</string>
+
+    <!-- Multi-Call, Add Call, Swap & Conference Strings (Hindi) -->
+    <string name="call_add_call">कॉल जोड़ें</string>
+    <string name="call_add_call_subtitle">संपर्क चुनें या बिना सहेजा नंबर डायल करें</string>
+    <string name="call_swap_calls">कॉल बदलें</string>
+    <string name="call_merge_calls">कॉल मिलाएं</string>
+    <string name="call_merging">मिलाया जा रहा है…</string>
+    <string name="call_merge_unavailable_hint">कॉल मिलाने के लिए दोनों कॉल जुड़े होने चाहिए</string>
+    <string name="call_merge_unsupported">आपके मोबाइल नेटवर्क ऑपरेटर द्वारा कॉन्फ्रेंस कॉल समर्थित नहीं है। आप बात जारी रख सकते हैं और कॉल बदलें (Swap) का उपयोग कर सकते हैं।</string>
+    <string name="call_active_status">सक्रिय</string>
+    <string name="call_on_hold_status">होल्ड पर</string>
+    <string name="call_conference_title">कॉन्फ्रेंस कॉल</string>
+    <string name="call_conference_connected">जुड़ा हुआ</string>
+    <string name="call_end_second_call">दूसरी कॉल समाप्त करें</string>
+    <string name="add_call_tab_contacts">संपर्क</string>
+    <string name="add_call_tab_dialpad">डायल पैड</string>
+    <string name="add_call_search_contacts">संपर्क खोजें...</string>
+    <string name="add_call_no_contacts">कोई संपर्क नहीं मिला</string>
+    <string name="add_call_select_number">फ़ोन नंबर चुनें</string>
+    <string name="add_call_invalid_number">कृपया एक मान्य फ़ोन नंबर दर्ज करें</string>
+    <string name="add_call_enter_number">फ़ोन नंबर दर्ज करें</string>
+    <string name="add_call_dialpad_call">कॉल</string>
+    <string name="add_call_dialpad_delete">हटाएं</string>
 </resources>

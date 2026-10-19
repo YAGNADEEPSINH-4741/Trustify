@@ -104,4 +104,94 @@ object ContactLookupHelper {
     fun clearCache() {
         cache.clear()
     }
+
+    /**
+     * Retrieves all device contacts with their associated phone numbers.
+     * Groups multiple phone numbers under the same contact record.
+     * Safely returns an empty list if READ_CONTACTS permission is missing.
+     */
+    fun getAllContacts(context: Context): List<DeviceContact> {
+        if (!hasPermission(context)) return emptyList()
+
+        val contactsMap = LinkedHashMap<String, MutableDeviceContact>()
+
+        try {
+            val projection = arrayOf(
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.NUMBER,
+                ContactsContract.CommonDataKinds.Phone.PHOTO_URI,
+                ContactsContract.CommonDataKinds.Phone.LOOKUP_KEY
+            )
+
+            context.contentResolver.query(
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                projection,
+                null,
+                null,
+                "${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME} COLLATE NOCASE ASC"
+            )?.use { cursor ->
+                val idIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)
+                val nameIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
+                val numberIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                val photoIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI)
+                val lookupIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.LOOKUP_KEY)
+
+                while (cursor.moveToNext()) {
+                    val id = if (idIdx >= 0) cursor.getString(idIdx) ?: "" else ""
+                    val name = if (nameIdx >= 0) cursor.getString(nameIdx) ?: "Unknown" else "Unknown"
+                    val rawNum = if (numberIdx >= 0) cursor.getString(numberIdx) ?: "" else ""
+                    val photoStr = if (photoIdx >= 0) cursor.getString(photoIdx) else null
+                    val lookup = if (lookupIdx >= 0) cursor.getString(lookupIdx) else null
+
+                    if (rawNum.isNotBlank()) {
+                        val key = if (id.isNotBlank()) id else name
+                        val entry = contactsMap.getOrPut(key) {
+                            MutableDeviceContact(
+                                id = id,
+                                name = name,
+                                photoUri = photoStr?.let { Uri.parse(it) },
+                                lookupKey = lookup
+                            )
+                        }
+                        val cleanNum = rawNum.trim()
+                        if (cleanNum !in entry.phoneNumbers) {
+                            entry.phoneNumbers.add(cleanNum)
+                        }
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            return emptyList()
+        }
+
+        return contactsMap.values.map {
+            DeviceContact(
+                id = it.id,
+                name = it.name,
+                phoneNumbers = it.phoneNumbers.toList(),
+                photoUri = it.photoUri,
+                lookupKey = it.lookupKey
+            )
+        }
+    }
+
+    private class MutableDeviceContact(
+        val id: String,
+        val name: String,
+        val phoneNumbers: MutableList<String> = mutableListOf(),
+        val photoUri: Uri? = null,
+        val lookupKey: String? = null
+    )
 }
+
+/**
+ * Device contact representation containing all telephone numbers associated with a contact.
+ */
+data class DeviceContact(
+    val id: String,
+    val name: String,
+    val phoneNumbers: List<String>,
+    val photoUri: Uri? = null,
+    val lookupKey: String? = null
+)

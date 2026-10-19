@@ -162,8 +162,8 @@ fun TrustedCallersScreenContent(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                containerColor = BrandBlue,
-                contentColor = androidx.compose.ui.graphics.Color.White
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.trusted_add_btn))
             }
@@ -191,7 +191,7 @@ fun TrustedCallersScreenContent(
                     Icon(
                         imageVector = Icons.Default.Info,
                         contentDescription = null,
-                        tint = BrandBlue,
+                        tint = com.safecallai.app.ui.theme.CyanAccent,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
@@ -206,34 +206,11 @@ fun TrustedCallersScreenContent(
             Spacer(modifier = Modifier.height(10.dp))
 
             if (trustedCallers.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(44.dp)
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = stringResource(R.string.trusted_empty_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            text = stringResource(R.string.trusted_empty_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                }
+                com.safecallai.app.ui.components.TrustifyEmptyState(
+                    icon = Icons.Default.Favorite,
+                    title = stringResource(R.string.trusted_empty_title),
+                    description = stringResource(R.string.trusted_empty_desc)
+                )
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -329,9 +306,8 @@ private fun TrustedCallerCard(
         PhoneNumberNormalizer.formatForDisplay(caller.normalizedPhoneNumber)
     }
 
-    Card(
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    com.safecallai.app.ui.components.TrustifyCard(
+        cornerRadius = 14.dp,
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
@@ -347,20 +323,12 @@ private fun TrustedCallerCard(
                 modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .clip(CircleShape)
-                        .background(LegitGreen.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Favorite,
-                        contentDescription = null,
-                        tint = LegitGreen,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                com.safecallai.app.ui.components.TrustifyAvatar(
+                    name = caller.customLabel,
+                    size = 40.dp,
+                    accentColor = MaterialTheme.colorScheme.primary,
+                    isActiveCall = false
+                )
 
                 Spacer(modifier = Modifier.width(12.dp))
 

@@ -125,9 +125,7 @@ fun ReportNumberScreenContent(
             Spacer(modifier = Modifier.height(4.dp))
 
             // Explanation Header Card
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            com.safecallai.app.ui.components.TrustifyCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -137,7 +135,7 @@ fun ReportNumberScreenContent(
                     Icon(
                         imageVector = Icons.Default.Flag,
                         contentDescription = null,
-                        tint = BrandBlue,
+                        tint = com.safecallai.app.ui.theme.ElectricMint,
                         modifier = Modifier.size(22.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
@@ -151,13 +149,11 @@ fun ReportNumberScreenContent(
 
             // Success or Error Feedback
             if (reportSuccessMessage != null) {
-                Card(
-                    shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = LegitGreen.copy(alpha = 0.15f)),
+                com.safecallai.app.ui.components.TrustifyCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
-                        modifier = Modifier.padding(14.dp),
+                        modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(Icons.Default.CheckCircle, contentDescription = null, tint = LegitGreen)
@@ -173,13 +169,11 @@ fun ReportNumberScreenContent(
             }
 
             if (reportErrorMessage != null) {
-                Card(
-                    shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = HighRiskRed.copy(alpha = 0.15f)),
+                com.safecallai.app.ui.components.TrustifyCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
-                        modifier = Modifier.padding(14.dp),
+                        modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(Icons.Default.Error, contentDescription = null, tint = HighRiskRed)
@@ -204,7 +198,7 @@ fun ReportNumberScreenContent(
                 label = { Text(stringResource(R.string.report_phone_label)) },
                 placeholder = { Text("e.g. +91 98765 43210") },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -220,7 +214,7 @@ fun ReportNumberScreenContent(
                     readOnly = true,
                     label = { Text(stringResource(R.string.report_category_label)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDropdownExpanded) },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor()
@@ -251,7 +245,7 @@ fun ReportNumberScreenContent(
                 label = { Text(stringResource(R.string.report_description_label)) },
                 placeholder = { Text(stringResource(R.string.report_details_placeholder)) },
                 minLines = 4,
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -262,7 +256,11 @@ fun ReportNumberScreenContent(
             ) {
                 Checkbox(
                     checked = isConfirmed,
-                    onCheckedChange = { isConfirmed = it }
+                    onCheckedChange = { isConfirmed = it },
+                    colors = androidx.compose.material3.CheckboxDefaults.colors(
+                        checkedColor = com.safecallai.app.ui.theme.ElectricMint,
+                        checkmarkColor = Color(0xFF070B14)
+                    )
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
@@ -281,8 +279,11 @@ fun ReportNumberScreenContent(
                         onSubmitReport(phoneNumber.trim(), selectedCategory, description.trim())
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = BrandBlue),
-                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = com.safecallai.app.ui.theme.ElectricMint,
+                    contentColor = Color(0xFF070B14)
+                ),
+                shape = RoundedCornerShape(14.dp),
                 enabled = phoneNumber.isNotBlank() && isConfirmed && !isSubmittingReport,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -290,7 +291,7 @@ fun ReportNumberScreenContent(
             ) {
                 if (isSubmittingReport) {
                     CircularProgressIndicator(
-                        color = Color.White,
+                        color = Color(0xFF070B14),
                         modifier = Modifier.size(20.dp),
                         strokeWidth = 2.dp
                     )
@@ -298,7 +299,8 @@ fun ReportNumberScreenContent(
                     Text(
                         text = stringResource(R.string.report_submit_btn),
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.Bold,
+                        color = if (phoneNumber.isNotBlank() && isConfirmed && !isSubmittingReport) Color(0xFF070B14) else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
